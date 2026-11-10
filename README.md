@@ -23,7 +23,7 @@ O projeto utiliza PostgreSQL, hospedado no Supabase, com acesso por meio da bibl
 **3.** Acesse a pasta do backend:
 
 ```bash
-cd back-end
+cd backend
 ```
 
 **4.** Instale as dependências:
@@ -32,7 +32,7 @@ cd back-end
 npm install
 ```
 
-**5.** Crie um arquivo `.env` na pasta `back-end/`, utilizando o `.env.example` como referência. Configure a variável de conexão com os dados fornecidos pelo Supabase:
+**5.** Crie um arquivo `.env` na pasta `backend/`, utilizando o `.env.example` como referência. Configure a variável de conexão com os dados fornecidos pelo Supabase:
 
 ```dotenv
 DATABASE_URL=postgresql://postgres.PROJECT_REF:SUA_SENHA@HOST.pooler.supabase.com:5432/postgres?sslmode=require
