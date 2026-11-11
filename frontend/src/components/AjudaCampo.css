@@ -1,0 +1,45 @@
+:root .fl-label-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+:root .fl-label-row label { margin-bottom: 0; }
+:root .fl-field-help { display: inline-flex; }
+
+:root .fl-help-button {
+  display: inline-grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--fl-secondary);
+}
+
+:root .fl-help-button:hover { color: var(--fl-accent); }
+:root .fl-help-button svg { width: 15px; height: 15px; }
+
+:root .fl-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 5;
+  width: min(100%, 300px);
+  padding: 10px 12px;
+  border: 1px solid var(--fl-line);
+  border-radius: 3px;
+  background: var(--fl-field);
+  color: var(--fl-text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (pointer: coarse) {
+  :root .fl-help-button { width: 44px; height: 44px; }
+}

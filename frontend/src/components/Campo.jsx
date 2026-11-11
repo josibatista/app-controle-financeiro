@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import Icone from './Icone.jsx';
+import AjudaCampo from './AjudaCampo.jsx';
 
-export default function Campo({ id, label, erro, ajuda, type = 'text', ...props }) {
+export default function Campo({ id, label, erro, ajuda, informacao, marcarObrigatorio = false, type = 'text', ...props }) {
   const [mostrar, setMostrar] = useState(false);
   const senha = type === 'password';
   const descricao = [ajuda && `${id}-ajuda`, erro && `${id}-erro`].filter(Boolean).join(' ') || undefined;
+  const rotulo = (
+    <label htmlFor={id}>
+      {label}{marcarObrigatorio && props.required && <span className="fl-required" aria-hidden="true"> *</span>}
+    </label>
+  );
 
   return (
     <div className="fl-field">
-      <label htmlFor={id}>{label}</label>
+      {informacao ? (
+        <div className="fl-label-row">
+          {rotulo}
+          <AjudaCampo id={`${id}-informacao`} campo={label} texto={informacao} />
+        </div>
+      ) : rotulo}
       <div className="fl-input-wrap">
         <input {...props} id={id} className={`fl-input${senha ? ' fl-password' : ''}`} type={senha && mostrar ? 'text' : type} aria-invalid={Boolean(erro)} aria-describedby={descricao} />
         {senha && (
@@ -22,3 +33,4 @@ export default function Campo({ id, label, erro, ajuda, type = 'text', ...props 
     </div>
   );
 }
+
