@@ -1,5 +1,45 @@
 # Em andamento... 🔄
 
+## 🛠️ Tecnologias e Bibliotecas Utilizadas
+
+O projeto utilizará diferentes tecnologias e bibliotecas para o desenvolvimento do front-end, back-end e integração com o banco de dados, contemplando a construção da interface, implementação da API REST, autenticação, validação de dados e persistência das informações.
+
+### 💻 Tecnologias
+
+| Tecnologia | Função |
+|---|---|
+| JavaScript | Linguagem utilizada no desenvolvimento da aplicação. |
+| HTML5 | Estruturação das páginas. |
+| CSS3 | Estilização da interface. |
+| Node.js | Ambiente de execução JavaScript no back-end. |
+| Vite | Ferramenta de desenvolvimento e compilação do front-end. |
+| Supabase | Plataforma de gerenciamento do banco de dados PostgreSQL. |
+
+### 🎨 Front-end
+
+| Biblioteca | Função |
+|---|---|
+| React | Construção da interface por meio de componentes. |
+| React Router DOM | Gerenciamento da navegação entre páginas. |
+| Recharts | Criação de gráficos para os relatórios financeiros. |
+
+### ⚙️ Back-end
+
+| Biblioteca | Função |
+|---|---|
+| Express | Criação do servidor e gerenciamento das rotas da API REST. |
+| Express Rate Limit | Limitação da quantidade de requisições. |
+| Zod | Validação dos dados recebidos pela API. |
+| CORS | Controle de acesso à API entre diferentes origens. |
+| JSON Web Token | Geração e validação de tokens de autenticação. |
+| Bcrypt | Proteção das senhas por meio de hash e salt. |
+| Dotenv | Gerenciamento de variáveis de ambiente. |
+
+### 🗄️ Banco de Dados
+
+| Biblioteca | Função |
+|---|---|
+| Supabase JS | Integração entre o back-end e os serviços do Supabase.
 
 ## 🚀 Como executar o projeto
 
