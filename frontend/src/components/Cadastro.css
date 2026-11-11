@@ -1,0 +1,27 @@
+:root .fl-main--cadastro { padding-top: 32px; padding-bottom: 38px; }
+:root .fl-main--cadastro .fl-form { margin-top: 26px; }
+:root .fl-main--cadastro .fl-field { margin-bottom: 17px; }
+
+:root .fl-main--cadastro .fl-required {
+  color: var(--fl-accent);
+  font-weight: 500;
+}
+
+:root .fl-main--cadastro .fl-switch { margin-top: 24px; padding-top: 20px; }
+
+:root .fl-cadastro-status {
+  margin-top: 14px;
+  color: var(--fl-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  :root .fl-main--cadastro { padding: 29px 22px 34px; }
+}
+
+@media (pointer: coarse) {
+  :root .fl-main--cadastro .fl-input { height: 48px; font-size: 16px; }
+  :root .fl-main--cadastro .fl-eye { width: 44px; height: 44px; right: 1px; top: 2px; }
+  :root .fl-main--cadastro .fl-text-button { min-height: 44px; }
+}
