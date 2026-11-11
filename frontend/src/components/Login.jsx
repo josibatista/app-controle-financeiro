@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Campo from './Campo.jsx';
 import Icone from './Icone.jsx';
 import LayoutAcesso from './LayoutAcesso.jsx';
@@ -18,7 +19,8 @@ export default function Login() {
         <Campo id="login-senha" name="senha" label="Senha" type="password" autoComplete="current-password" placeholder="Sua senha" value={dados.senha} onChange={alterar} required />
         <button className="fl-submit" type="submit"><span>Entrar</span><Icone nome="seta" /></button>
       </form>
-      <p className="fl-switch"><span>Ainda não tem uma conta?</span> <button className="fl-text-button" type="button">Criar conta</button></p>
+      <p className="fl-switch"><span>Ainda não tem uma conta?</span> <Link className="fl-text-button" to="/cadastro">Criar conta</Link></p>
     </LayoutAcesso>
   );
 }
+
