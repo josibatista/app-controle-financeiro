@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+    :root{color-scheme:light;--fl-bg:#fffcfd;--fl-field:#fff;--fl-text:#302a2f;--fl-secondary:#5f515b;--fl-line:#e7dce2;--fl-accent:#b02e67;--fl-accent-ink:#fff;--fl-muted:#faf3f6;--fl-error:#a72c39;font:400 14px/1.5 'DM Sans',sans-serif;color:var(--fl-text);position:relative;}
+    :root[data-theme="dark"]{color-scheme:dark;--fl-bg:#201a1e;--fl-field:#271f25;--fl-text:#f0e4eb;--fl-secondary:#bcacb6;--fl-line:#493640;--fl-accent:#efa7c4;--fl-accent-ink:#3b1325;--fl-muted:#30232c;--fl-error:#ffb2b9;}
+    :root *{box-sizing:border-box;}
+    :root h1,:root h2,:root p{margin:0;}
+    :root button,:root input{font:inherit;}
+    :root button{color:inherit;}
+    :root [hidden]{display:none!important;}
+    :root button:focus-visible,:root input:focus-visible{outline:2px solid var(--fl-accent);outline-offset:4px;}
+    :root .fl-page{min-height:100dvh;background:var(--fl-bg);color:var(--fl-text);}
+:root .fl-main,:root .fl-form{color:var(--fl-text);}
+    :root .fl-header{padding:25px 35px;border-bottom:1px solid var(--fl-line);display:flex;align-items:center;gap:12px;}
+    :root .fl-theme-switch{margin-left:auto;display:flex;flex-shrink:0;border:1px solid var(--fl-line);border-radius:3px;padding:2px;background:var(--fl-field);gap:2px;}
+    :root .fl-theme-option{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 9px;border:0;border-radius:1px;color:var(--fl-secondary);background:transparent;font-size:12px;min-height:33px;}
+    :root .fl-theme-option svg{width:14px;height:14px;color:currentColor;}
+    :root .fl-theme-option[aria-pressed="true"]{background:var(--fl-muted);color:var(--fl-accent);font-weight:500;}
+    :root .fl-main{width:min(100%,420px);margin:0 auto;padding:61px 25px 56px;}
+    :root .fl-heading{color:var(--fl-text);font-weight:500;font-size:27px;letter-spacing:-.8px;line-height:1.2;}
+    :root .fl-description{font-size:14px;color:var(--fl-secondary);margin-top:9px;}
+    :root .fl-form{margin-top:31px;}
+    :root .fl-field{margin-bottom:21px;}
+    :root .fl-field label{display:block;color:var(--fl-text);font-size:13px;font-weight:500;margin-bottom:7px;}
+    :root .fl-input-wrap{position:relative;}
+    :root .fl-input{display:block;width:100%;height:46px;background:var(--fl-field);color:var(--fl-text);border:1px solid var(--fl-line);border-radius:3px;padding:11px 12px;font-size:14px;}
+    :root .fl-input{caret-color:var(--fl-accent);-webkit-text-fill-color:var(--fl-text);}
+    :root .fl-input::placeholder{color:var(--fl-secondary);-webkit-text-fill-color:var(--fl-secondary);opacity:1;}
+    :root .fl-password{padding-right:48px;}
+    :root .fl-input[aria-invalid="true"]{border-color:var(--fl-error);}
+    :root .fl-eye{position:absolute;right:3px;top:3px;width:40px;height:40px;display:grid;place-items:center;background:transparent;border:0;border-radius:2px;color:var(--fl-secondary);padding:0;}
+    :root .fl-eye svg{width:17px;height:17px;}
+    :root .fl-field-error{font-size:12px;color:var(--fl-error);margin-top:6px;}
+    :root .fl-help{font-size:12px;color:var(--fl-secondary);margin-top:6px;}
+    :root .fl-submit{border:1px solid transparent;border-radius:3px;width:100%;min-height:46px;padding:11px 15px;background:var(--fl-accent);color:var(--fl-accent-ink);font-size:14px;font-weight:500;display:flex;justify-content:center;align-items:center;gap:9px;margin-top:6px;}
+    :root .fl-submit:disabled{opacity:.66;}
+    :root .fl-submit span,:root .fl-submit svg{color:var(--fl-accent-ink);}
+    :root .fl-submit svg{width:16px;height:16px;}
+    :root .fl-alert{font-size:13px;color:var(--fl-error);padding:11px 0 0;}
+    :root .fl-switch{margin-top:25px;padding-top:23px;border-top:1px solid var(--fl-line);text-align:center;font-size:13px;color:var(--fl-secondary);}
+    :root .fl-switch>span{color:var(--fl-secondary);}
+    :root .fl-text-button{display:inline-flex;align-items:center;color:var(--fl-accent);padding:4px 3px;background:transparent;border:0;border-radius:2px;text-decoration:underline;text-underline-offset:3px;font-weight:500;}
+    
+
+body { margin: 0; min-width: 320px; }
+button:not(:disabled), a { cursor: pointer; }
+button:disabled { cursor: wait; }
+.fl-password { padding-right: 48px; }
