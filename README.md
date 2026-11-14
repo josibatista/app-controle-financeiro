@@ -101,4 +101,40 @@ O seed insere usuários fictícios, categorias, fontes/destinos e lançamentos p
 
 ### 3. Execução da aplicação
 
-*As instruções de inicialização do backend e do frontend serão adicionadas conforme o desenvolvimento do projeto.*
+#### 3.1. Front-end
+
+O front-end foi desenvolvido com React e Vite.
+
+**1.** A partir da raiz do projeto, acesse a pasta do frontend:
+
+```bash
+cd frontend
+```
+
+**2.** Instale as dependências:
+
+```bash
+npm install
+```
+
+**3.** Inicie o servidor de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+**4.** Acesse a aplicação pelo navegador:
+
+http://localhost:5173
+
+O Vite informará no terminal o endereço local disponível para acesso.
+
+Para gerar a versão de produção do frontend, execute:
+
+```bash
+npm run build
+```
+
+#### 3.2. Back-end
+
+Em breve.
