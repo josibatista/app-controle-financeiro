@@ -1,0 +1,357 @@
+/* Estrutura da página */
+.lc-page .lc-main {
+  width: min(100%, 1200px);
+  margin: auto;
+  padding: 36px 28px 56px;
+}
+
+.lc-page .lc-marca {
+  font-weight: 600;
+}
+
+.lc-page .lc-cabecalho,
+.lc-page .lc-secao-topo,
+.lc-page .lc-modal-topo,
+.lc-page .lc-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lc-page .lc-cabecalho,
+.lc-page .lc-modal-topo {
+  margin-bottom: 22px;
+}
+
+/* Painéis, filtros e resumo */
+.lc-page .lc-painel {
+  padding: 22px;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-field);
+}
+
+.lc-page .lc-secao-topo {
+  margin-bottom: 18px;
+}
+
+.lc-page .lc-secao-topo h2,
+.lc-page .lc-total h2 {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.lc-page .lc-filtros,
+.lc-page .lc-resumo,
+.lc-page .lc-form-grid,
+.lc-page .lc-detalhes {
+  display: grid;
+  gap: 20px;
+}
+
+.lc-page .lc-filtros {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lc-page .lc-resumo {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 22px;
+}
+
+.lc-page .lc-form-grid,
+.lc-page .lc-detalhes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lc-page .lc-largura-total {
+  grid-column: 1 / -1;
+}
+
+.lc-page .lc-filtros .fl-field,
+.lc-page .lc-form-grid .fl-field {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.lc-page select {
+  font: inherit;
+}
+
+.lc-page select:focus-visible {
+  outline: 2px solid var(--fl-accent);
+  outline-offset: 4px;
+}
+
+.lc-page select:disabled {
+  opacity: 0.65;
+}
+
+.lc-page .fl-required {
+  color: var(--fl-accent);
+}
+
+.lc-page .lc-total h2,
+.lc-page .lc-texto-secundario {
+  color: var(--fl-secondary);
+}
+
+.lc-page .lc-total strong {
+  display: block;
+  margin-top: 10px;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lc-page .lc-total:last-child {
+  border-top: 3px solid var(--fl-accent);
+}
+
+/* Avisos e mensagens */
+.lc-page .lc-aviso {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--fl-line);
+  border-radius: 4px;
+  background: var(--fl-muted);
+  color: var(--fl-secondary);
+  font-size: 13px;
+}
+
+.lc-page .lc-texto-secundario,
+.lc-page .lc-status {
+  font-size: 13px;
+}
+
+.lc-page .lc-status {
+  min-height: 24px;
+  margin: 12px 0;
+  color: var(--fl-secondary);
+}
+
+/* Tabela */
+.lc-page .lc-tabela-wrap {
+  overflow-x: auto;
+}
+
+.lc-page .lc-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.lc-page .lc-tabela th,
+.lc-page .lc-tabela td {
+  padding: 15px 12px;
+  border-bottom: 1px solid var(--fl-line);
+}
+
+.lc-page .lc-tabela th {
+  background: var(--fl-muted);
+  color: var(--fl-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lc-page .lc-tabela td:first-child,
+.lc-page .lc-tabela td:last-child {
+  white-space: nowrap;
+}
+
+.lc-page .lc-numero {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.lc-page .lc-tipo {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--fl-line);
+  border-radius: 4px;
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+.lc-page .lc-tipo--entrada {
+  background: var(--fl-muted);
+  color: var(--fl-accent);
+}
+
+.lc-page .lc-tabela .lc-vazio {
+  padding: 38px 16px;
+  color: var(--fl-secondary);
+  text-align: center;
+  white-space: normal;
+}
+
+/* Botões e paginação */
+.lc-page .lc-acoes,
+.lc-page .lc-modal-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.lc-page .lc-paginacao {
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.lc-page .lc-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid var(--fl-line);
+  border-radius: 3px;
+  background: var(--fl-field);
+  color: var(--fl-text);
+  font-weight: 500;
+}
+
+.lc-page .lc-botao:hover:not(:disabled) {
+  background: var(--fl-muted);
+}
+
+.lc-page .lc-botao--principal {
+  border-color: var(--fl-accent);
+  background: var(--fl-accent);
+  color: var(--fl-accent-ink);
+}
+
+.lc-page .lc-botao--principal:hover:not(:disabled) {
+  background: var(--fl-accent);
+  filter: brightness(0.94);
+}
+
+.lc-page .lc-botao--perigo {
+  border-color: var(--fl-error);
+  color: var(--fl-error);
+}
+
+.lc-page .lc-botao:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.lc-page .lc-modal {
+  width: min(640px, calc(100% - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: 26px;
+  overflow-y: auto;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-field);
+  color: var(--fl-text);
+}
+
+.lc-page .lc-modal::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.lc-page .lc-modal-topo h2 {
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.lc-page .lc-fechar {
+  min-width: 42px;
+  padding: 4px;
+  font-size: 24px;
+}
+
+.lc-page .lc-introducao {
+  margin-bottom: 20px;
+}
+
+.lc-page .lc-modal p + p {
+  margin-top: 14px;
+}
+
+.lc-page .lc-modal .lc-aviso {
+  margin-top: 20px;
+}
+
+.lc-page .lc-modal-acoes {
+  justify-content: flex-end;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--fl-line);
+}
+
+.lc-page .lc-detalhes {
+  margin: 0;
+}
+
+.lc-page .lc-detalhes dt {
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+.lc-page .lc-detalhes dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* Texto disponível apenas para leitores de tela */
+.lc-page .lc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Adaptação para telas menores */
+@media (max-width: 950px) {
+  .lc-page .lc-filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .lc-page .lc-main {
+    padding: 26px 16px 40px;
+  }
+
+  .lc-page .fl-header {
+    padding: 18px 16px;
+    flex-wrap: wrap;
+  }
+
+  .lc-page .lc-cabecalho {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lc-page .lc-resumo,
+  .lc-page .lc-filtros,
+  .lc-page .lc-form-grid,
+  .lc-page .lc-detalhes {
+    grid-template-columns: 1fr;
+  }
+
+  .lc-page .lc-painel,
+  .lc-page .lc-modal {
+    padding: 18px;
+  }
+
+  .lc-page .lc-secao-topo {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .lc-page .fl-input {
+    font-size: 16px;
+  }
+}
