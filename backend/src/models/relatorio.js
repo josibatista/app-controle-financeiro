@@ -1,4 +1,3 @@
-
 import { pool } from '../config/db.js';
 
 export async function listarPorCategoria(
@@ -54,7 +53,31 @@ export async function listarPorCategoria(
          SUM(total_atual) AS total_tipo_atual
        FROM totais
        GROUP BY tipo
-     )
+     ),
+
+     resumo_periodo AS (
+      SELECT
+        COALESCE(
+          SUM(total_atual) FILTER (WHERE tipo = 'entrada'),
+          0
+        ) AS total_entradas,
+
+        COALESCE(
+          SUM(total_atual) FILTER (WHERE tipo = 'saida'),
+          0
+        ) AS total_saidas,
+
+        COALESCE(
+          SUM(total_atual) FILTER (WHERE tipo = 'entrada'),
+          0
+        ) -
+        COALESCE(
+          SUM(total_atual) FILTER (WHERE tipo = 'saida'),
+          0
+        ) AS saldo_periodo
+
+      FROM totais
+    )
 
      SELECT
        t.categoria_id,
@@ -62,6 +85,9 @@ export async function listarPorCategoria(
        t.tipo,
        t.total_atual,
        t.total_anterior,
+       r.total_entradas,
+       r.total_saidas,
+       r.saldo_periodo,
 
        CASE
          WHEN tt.total_tipo_atual = 0 THEN 0
@@ -84,17 +110,23 @@ export async function listarPorCategoria(
          )
        END AS variacao_percentual
 
-     FROM totais t
+     FROM resumo_periodo r
 
-     JOIN totais_por_tipo tt
+     LEFT JOIN totais t
+       ON TRUE
+
+     LEFT JOIN totais_por_tipo tt
        ON tt.tipo = t.tipo
 
      ORDER BY t.tipo, t.total_atual DESC`,
     [usuarioId, inicio, fim]
   );
 
-  
-  const categorias = resultado.rows.map((item) => ({
+  const resumo = resultado.rows[0];
+
+  const categorias = resultado.rows
+    .filter((item) => item.categoria_id !== null)
+    .map((item) => ({
     id: item.categoria_id,
     nome: item.categoria,
     tipo: item.tipo,
@@ -122,18 +154,16 @@ export async function listarPorCategoria(
     },
 
     saidas: {
-      total: saidas.reduce(
-        (soma, item) => soma + item.total, 0
-      ),
+      total: Number(resumo?.total_saidas ?? 0),
       categorias: saidas.map(({ tipo, ...item }) => item),
     },
 
     entradas: {
-      total: entradas.reduce(
-        (soma, item) => soma + item.total, 0
-      ),
+      total: Number(resumo?.total_entradas ?? 0),
       categorias: entradas.map(({ tipo, ...item }) => item),
     },
+
+    saldo: Number(resumo?.saldo_periodo ?? 0),
   };
 }
 

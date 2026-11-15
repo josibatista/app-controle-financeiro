@@ -35,26 +35,6 @@ function validarPeriodo(inicio, fim) {
   );
 }
 
-//rotas de usuários
-router.get('/usuarios', (req, res) => {
-  res.status(200).json({ mensagem: 'Rotas de usuários' });
-});
-
-//rotas de categorias
-router.get('/categorias', (req, res) => {
-  res.status(200).json({ mensagem: 'Rotas de categorias' });
-});
-
-//rotas de fontes e destinos
-router.get('/fontes-destinos', (req, res) => {
-  res.status(200).json({ mensagem: 'Rotas de fontes e destinos' });
-});
-
-//rotas de lançamentos
-router.get('/lancamentos', (req, res) => {
-  res.status(200).json({ mensagem: 'Rotas de lançamentos' });
-});
-
 //relatório por categoria
 router.get('/relatorios/categorias', async (req, res) => {
   try {
