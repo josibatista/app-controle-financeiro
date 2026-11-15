@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import categoriasRouter from './routes/categorias.js';
+import fontesDestinosRouter from './routes/fontesDestinos.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use('/api', (req, res, next) => {
 });
 
 app.use('/api/categorias', categoriasRouter);
+app.use('/api/fontes-destinos', fontesDestinosRouter);
 
 app.use((req, res) => {
   res.status(404).json({ mensagem: 'Rota não encontrada.' });
