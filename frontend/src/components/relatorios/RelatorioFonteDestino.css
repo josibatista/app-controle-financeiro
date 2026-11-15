@@ -1,0 +1,330 @@
+.relatorio-fontes-destinos h2 {
+    margin: 28px 0 24px;
+    color: var(--fl-accent);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.relatorio-fontes-destinos .filtro-periodo {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 24px;
+    margin: 20px 0 28px;
+    background: var(--fl-muted);
+    border: 1px solid var(--fl-line);
+    border-radius: 6px;
+}
+
+.relatorio-fontes-destinos .filtro-periodo label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--fl-text);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.relatorio-fontes-destinos .filtro-periodo input {
+    width: 210px;
+    height: 46px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--fl-line);
+    border-radius: 4px;
+    background: var(--fl-field);
+    color: var(--fl-text);
+    font-size: 15px;
+}
+
+.relatorio-fontes-destinos .filtro-periodo input:focus {
+    border-color: var(--fl-accent);
+    box-shadow: 0 0 0 3px rgba(176, 46, 103, 0.12);
+    outline: none;
+}
+
+.relatorio-fontes-destinos .filtro-periodo button {
+    min-width: 190px;
+    min-height: 46px;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 4px;
+    background: var(--fl-accent);
+    color: var(--fl-accent-ink);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.relatorio-fontes-destinos .filtro-periodo button:hover:not(:disabled) {
+    background: #922454;
+}
+
+.relatorio-fontes-destinos .filtro-periodo button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+/* Indicadores */
+.relatorio-fontes-destinos .indicadores-relatorio {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin: 28px 0;
+}
+
+.relatorio-fontes-destinos .indicadores-relatorio > div {
+    padding: 28px;
+    box-sizing: border-box;
+    background: var(--fl-field);
+    border: 1px solid var(--fl-line);
+    border-radius: 6px;
+    box-shadow: 0 3px 12px rgba(48, 42, 47, 0.04);
+}
+
+.relatorio-fontes-destinos .indicadores-relatorio h3 {
+    margin-bottom: 14px;
+    color: var(--fl-secondary);
+    font-size: 17px;
+}
+
+.relatorio-fontes-destinos .indicadores-relatorio p {
+    color: var(--fl-accent);
+    font-size: 30px;
+    font-weight: 700;
+}
+
+/* Textos gerais */
+.relatorio-fontes-destinos > p {
+    color: #475569;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.relatorio-fontes-destinos p[role="alert"] {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #FEF2F2;
+    color: #B91C1C;
+}
+
+/* Gráficos */
+.relatorio-fontes-destinos .grafico-fontes,
+.relatorio-fontes-destinos .grafico-destinos {
+    width: 100%;
+    min-width: 0;
+    min-height: 380px;
+    padding: 26px;
+    margin: 32px 0;
+    box-sizing: border-box;
+    background: var(--fl-field);
+    border: 1px solid var(--fl-line);
+    border-radius: 6px;
+    box-shadow: 0 3px 12px rgba(48, 42, 47, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.relatorio-fontes-destinos .grafico-fontes:hover,
+.relatorio-fontes-destinos .grafico-destinos:hover {
+    box-shadow: 0 6px 18px rgba(176, 46, 103, 0.10);
+}
+
+.relatorio-fontes-destinos .grafico-fontes h3,
+.relatorio-fontes-destinos .grafico-destinos h3 {
+    margin-bottom: 14px;
+    color: var(--fl-accent);
+    font-size: 19px;
+}
+
+.relatorio-fontes-destinos .grafico-fontes > p,
+.relatorio-fontes-destinos .grafico-destinos > p {
+    margin-bottom: 22px;
+    color: var(--fl-secondary);
+    font-size: 14px;
+}
+
+/* Saldos das contas */
+.relatorio-fontes-destinos .saldos-contas {
+    margin: 32px 0;
+    padding: 26px;
+    background: var(--fl-field);
+    border: 1px solid var(--fl-line);
+    border-radius: 6px;
+    box-shadow: 0 3px 12px rgba(48, 42, 47, 0.04);
+}
+
+.relatorio-fontes-destinos .saldos-contas h3 {
+    margin-bottom: 8px;
+    color: var(--fl-accent);
+    font-size: 20px;
+}
+
+.relatorio-fontes-destinos .saldos-contas > p {
+    margin-bottom: 22px;
+    color: var(--fl-secondary);
+    font-size: 14px;
+}
+
+.lista-saldos-contas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.card-saldo-conta {
+    padding: 22px;
+    box-sizing: border-box;
+    background: var(--fl-muted);
+    border: 1px solid var(--fl-line);
+    border-radius: 6px;
+}
+
+.card-saldo-conta h4 {
+    margin-bottom: 18px;
+    color: var(--fl-accent);
+    font-size: 17px;
+}
+
+.card-saldo-conta p {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 10px 0;
+    color: var(--fl-secondary);
+    font-size: 14px;
+}
+
+.card-saldo-conta p strong {
+    color: var(--fl-text);
+    white-space: nowrap;
+}
+
+.valor-saldo-conta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--fl-line);
+}
+
+.valor-saldo-conta span {
+    color: var(--fl-secondary);
+    font-size: 14px;
+}
+
+.valor-saldo-conta strong {
+    color: var(--fl-accent);
+    font-size: 23px;
+}
+
+/* Tabela */
+.relatorio-fontes-destinos .tabela-fontes-destinos {
+    margin: 32px 0;
+    padding: 26px;
+    background: var(--fl-field);
+    border: 1px solid var(--fl-line);
+    border-radius: 6px;
+    box-shadow: 0 3px 12px rgba(48, 42, 47, 0.04);
+}
+
+.tabela-fontes-destinos h3 {
+    margin-bottom: 8px;
+    color: var(--fl-accent);
+    font-size: 20px;
+}
+
+.tabela-fontes-destinos > p {
+    margin-bottom: 22px;
+    color: var(--fl-secondary);
+    font-size: 14px;
+}
+
+.tabela-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabela-fontes-destinos table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.tabela-fontes-destinos th,
+.tabela-fontes-destinos td {
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--fl-line);
+    color: var(--fl-text);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.tabela-fontes-destinos thead th {
+    background: var(--fl-muted);
+    color: var(--fl-secondary);
+    font-weight: 700;
+}
+
+.tabela-fontes-destinos tbody tr:hover {
+    background: var(--fl-muted);
+}
+
+.tabela-fontes-destinos .linha-total {
+    background: var(--fl-muted);
+    font-weight: 700;
+}
+
+.tabela-fontes-destinos .linha-total td {
+    color: var(--fl-text);
+    font-weight: 700;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .relatorio-fontes-destinos .filtro-periodo {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .relatorio-fontes-destinos .filtro-periodo input {
+        width: 100%;
+    }
+
+    .relatorio-fontes-destinos .filtro-periodo button {
+        width: 100%;
+    }
+
+    .relatorio-fontes-destinos .indicadores-relatorio {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .relatorio-fontes-destinos .indicadores-relatorio p {
+        font-size: 24px;
+    }
+
+    .lista-saldos-contas {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .relatorio-fontes-destinos .grafico-fontes,
+    .relatorio-fontes-destinos .grafico-destinos {
+        min-height: 350px;
+        padding: 18px;
+    }
+
+    .relatorio-fontes-destinos .saldos-contas,
+    .relatorio-fontes-destinos .tabela-fontes-destinos {
+        padding: 18px;
+    }
+
+    .tabela-fontes-destinos th,
+    .tabela-fontes-destinos td {
+        padding: 12px;
+    }
+}

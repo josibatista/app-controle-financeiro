@@ -167,7 +167,6 @@ export async function listarPorCategoria(
   };
 }
 
-
 export async function listarPorFonteDestino(
   usuarioId,
   { inicio, fim },
@@ -254,15 +253,20 @@ export async function listarPorFonteDestino(
       inicio,
       fim,
     },
+
     fontes: {
       total: fontes.reduce((soma, item) => soma + item.total, 0),
       itens: fontes,
     },
+
     destinos: {
       total: destinos.reduce((soma, item) => soma + item.total, 0),
       itens: destinos,
     },
+
     contas,
+
+    registros,
   };
 }
 
