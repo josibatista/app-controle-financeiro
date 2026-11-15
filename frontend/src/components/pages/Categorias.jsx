@@ -321,7 +321,7 @@ export default function Categorias() {
             onClick={abrirCadastro}
             disabled={editando !== null || ocupado || carregando}
           >
-            <span aria-hidden="true">＋</span> Nova categoria
+            <span aria-hidden="true">＋</span> Adicionar
           </button>
         </div>
 
@@ -343,7 +343,7 @@ export default function Categorias() {
           </p>
         )}
 
-        <p className="cat-status" role="status">{mensagem}</p>
+        {mensagem && (<p className="cat-status" role="status"> {mensagem}</p>)}
 
         {erroPagina && (
           <div className="cat-erro" role="alert">
