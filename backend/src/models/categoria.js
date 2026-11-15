@@ -85,3 +85,28 @@ export async function criarPadrao(usuarioId, db = pool) {
 
   return resultado.rows;
 }
+
+export async function bloquearPorId(id, usuarioId, db = pool) {
+  const resultado = await db.query(
+    `SELECT id, usuario_id, nome, tipo
+     FROM categorias
+     WHERE id = $1 AND usuario_id = $2
+     FOR UPDATE`,
+    [id, usuarioId]
+  );
+
+  return resultado.rows[0] ?? null;
+}
+
+export async function temLancamentos(categoriaId, db = pool) {
+  const resultado = await db.query(
+    `SELECT EXISTS (
+       SELECT 1
+       FROM lancamentos
+       WHERE categoria_id = $1
+     ) AS existe`,
+    [categoriaId]
+  );
+
+  return resultado.rows[0].existe;
+}
