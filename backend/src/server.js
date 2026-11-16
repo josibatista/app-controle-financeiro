@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import categoriasRouter from './routes/categorias.js';
-import fontesDestinosRouter from './routes/fontesDestinos.js';
+import router from './routes/route.js';
 
 const app = express();
 
@@ -14,8 +13,7 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-app.use('/api/categorias', categoriasRouter);
-app.use('/api/fontes-destinos', fontesDestinosRouter);
+app.use('/api', router);
 
 app.use((req, res) => {
   res.status(404).json({ mensagem: 'Rota não encontrada.' });
@@ -42,6 +40,18 @@ app.use((erro, req, res, next) => {
     return res.status(409).json({
       mensagem:
         'Esta categoria possui lançamentos associados e não pode ser excluída.',
+    });
+  }
+
+  if (
+    [
+      'RELACIONAMENTO_INVALIDO',
+      'TIPO_INCOMPATIVEL',
+      'PARCELAMENTO_INVALIDO',
+    ].includes(erro.code)
+  ) {
+    return res.status(400).json({
+      mensagem: erro.message,
     });
   }
 
