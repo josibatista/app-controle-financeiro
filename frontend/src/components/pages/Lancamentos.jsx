@@ -1,19 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Campo from '../Campo.jsx';
 import SeletorTema from '../SeletorTema.jsx';
 import {
-  categoriasDemo,
-  fontesDestinosDemo,
-  criarLancamentosDemo,
   dataLocal,
   dataValida,
   formatarData,
   formatarMoeda,
   paraCentavos,
   periodoMesAtual,
-  simularCadastro,
   validarLancamento,
-} from '../../services/lancamentosDemo.js';
+} from '../../services/lancamentosUtils.js';
+import {
+  listarLancamentos,
+  buscarResumo,
+  listarCategorias,
+  listarFontesDestinos,
+  criarLancamento,
+  atualizarLancamento,
+  excluirLancamento,
+  excluirGrupoParcelamento,
+} from '../../services/lancamentos.js';
 import './Lancamentos.css';
 
 const POR_PAGINA = 5;
@@ -39,12 +45,12 @@ function novoFormulario() {
   };
 }
 
-function nomeCategoria(id) {
-  return categoriasDemo.find((item) => item.id === Number(id))?.nome ?? '—';
+function nomeCategoria(id, categorias) {
+  return categorias.find((item) => item.id === Number(id))?.nome ?? '—';
 }
 
-function nomeFonte(id) {
-  return fontesDestinosDemo.find((item) => item.id === Number(id))?.nome ?? '—';
+function nomeFonte(id, fontesDestinos) {
+  return fontesDestinos.find((item) => item.id === Number(id))?.nome ?? '—';
 }
 
 function Selecao({ id, label, erro, children, required = false, ...props }) {
@@ -76,7 +82,15 @@ function Selecao({ id, label, erro, children, required = false, ...props }) {
 }
 
 export default function Lancamentos() {
-  const [lancamentos, setLancamentos] = useState(criarLancamentosDemo);
+  const [lancamentos, setLancamentos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [fontesDestinos, setFontesDestinos] = useState([]);
+  const [totalRegistros, setTotalRegistros] = useState(0);
+  const [carregando, setCarregando] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState('');
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [recarregar, setRecarregar] = useState(0);
+  const [operando, setOperando] = useState(false);
   const [filtros, setFiltros] = useState(novosFiltros);
   const [pagina, setPagina] = useState(1);
   const [modo, setModo] = useState(null);
@@ -85,6 +99,7 @@ export default function Lancamentos() {
   const [erros, setErros] = useState({});
   const [mensagem, setMensagem] = useState('');
   const dialogRef = useRef(null);
+  const [totais, setTotais] = useState({entrada: 0, saida: 0, saldo: 0,});
 
   useEffect(() => {
     document.title = 'Meus lançamentos';
@@ -99,6 +114,30 @@ export default function Lancamentos() {
     if (!aberto && dialog.open) dialog.close();
   }, [aberto]);
 
+  useEffect(() => {
+  const controlador = new AbortController();
+
+  async function carregarOpcoes() {
+    try {
+      const [categoriasRecebidas, fontesRecebidas] = await Promise.all([
+        listarCategorias(controlador.signal),
+        listarFontesDestinos(controlador.signal),
+      ]);
+
+      setCategorias(categoriasRecebidas);
+      setFontesDestinos(fontesRecebidas);
+    } catch (erro) {
+      if (erro.name !== 'AbortError') {
+        setErroCarregamento(erro.message);
+      }
+    }
+  }
+
+  carregarOpcoes();
+
+  return () => controlador.abort();
+}, []);
+
   const erroPeriodo =
     (filtros.dataInicial && !dataValida(filtros.dataInicial)) ||
     (filtros.dataFinal && !dataValida(filtros.dataFinal))
@@ -109,44 +148,107 @@ export default function Lancamentos() {
         ? 'A data inicial deve ser anterior ou igual à data final.'
         : '';
 
-  const filtrados = useMemo(() => {
-    if (erroPeriodo) return [];
+  useEffect(() => {
+    const controlador = new AbortController();
 
-    return lancamentos
-      .filter((item) => (
-        (!filtros.dataInicial || item.data >= filtros.dataInicial) &&
-        (!filtros.dataFinal || item.data <= filtros.dataFinal) &&
-        (!filtros.tipo || item.tipo === filtros.tipo) &&
-        (!filtros.categoria_id ||
-          item.categoria_id === Number(filtros.categoria_id)) &&
-        (!filtros.fonte_destino_id ||
-          item.fonte_destino_id === Number(filtros.fonte_destino_id))
-      ))
-      .sort((a, b) => b.data.localeCompare(a.data));
-  }, [lancamentos, filtros, erroPeriodo]);
+    async function carregarResumo() {
+      if (erroPeriodo) {
+        setTotais({
+          entrada: 0,
+          saida: 0,
+          saldo: 0,
+        });
+        return;
+      }
 
-  const totais = filtrados.reduce(
-    (resultado, item) => {
-      resultado[item.tipo] += paraCentavos(item.valor);
-      return resultado;
-    },
-    { entrada: 0, saida: 0 },
-  );
+      try {
+        const resumo = await buscarResumo(
+          filtros,
+          controlador.signal,
+        );
 
-  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
-  const paginaAtual = Math.min(pagina, totalPaginas);
+        setTotais({
+          entrada: paraCentavos(resumo.totalEntradas),
+          saida: paraCentavos(resumo.totalSaidas),
+          saldo: paraCentavos(resumo.saldo, true),
+        });
+      } catch (erro) {
+        if (erro.name !== 'AbortError') {
+          setErroCarregamento(erro.message);
+        }
+      }
+    }
+
+    carregarResumo();
+
+    return () => controlador.abort();
+  }, [filtros, erroPeriodo, recarregar]);
+
+  useEffect(() => {
+    const controlador = new AbortController();
+
+    
+    async function carregarLancamentos() {
+      if (erroPeriodo) {
+        setLancamentos([]);
+        setTotalPaginas(0);
+        setTotalRegistros(0);
+        setCarregando(false);
+        return;
+      }
+
+      try {
+        setCarregando(true);
+        setErroCarregamento('');
+
+        const recebidos = await listarLancamentos(
+          filtros,
+          controlador.signal,
+          pagina,
+          POR_PAGINA,
+        );
+
+        setLancamentos(
+          recebidos.dados.map((item) => ({
+            ...item,
+            data: item.data.slice(0, 10),
+          })),
+        );
+
+        setTotalPaginas(recebidos.totalPaginas);
+        setTotalRegistros(recebidos.total);
+      } catch (erro) {
+        if (erro.name !== 'AbortError') {
+          setErroCarregamento(erro.message);
+        }
+      } finally {
+        if (!controlador.signal.aborted) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarLancamentos();
+
+    return () => controlador.abort();
+  }, [filtros, erroPeriodo, recarregar, pagina]);
+
+  const paginaAtual = pagina;
   const inicio = (paginaAtual - 1) * POR_PAGINA;
-  const visiveis = filtrados.slice(inicio, inicio + POR_PAGINA);
+  const visiveis = lancamentos;
 
-  const fonteSelecionada = fontesDestinosDemo.find(
-    (item) => item.id === Number(dados.fonte_destino_id),
+  const fonteSelecionada = fontesDestinos.find(
+  (item) => item.id === Number(dados.fonte_destino_id),
   );
+
   const editando = modo === 'editar';
   const formularioAberto = modo === 'novo' || editando;
-  const categoriasFormulario = categoriasDemo.filter(
+
+  const categoriasFormulario = categorias.filter(
     (item) => item.tipo === dados.tipo,
   );
-  const categoriasFiltro = categoriasDemo.filter(
+
+  const categoriasFiltro = categorias.filter(
     (item) => !filtros.tipo || item.tipo === filtros.tipo,
   );
 
@@ -212,10 +314,19 @@ export default function Lancamentos() {
     setErros({});
   }
 
-  function salvar(event) {
+  async function salvar(event) {
     event.preventDefault();
 
-    const novosErros = validarLancamento(dados, editando);
+    const novosErros = validarLancamento(
+      dados,
+      categorias,
+      fontesDestinos,
+      editando,
+    );
+
+    console.log('Dados do formulário:', dados);
+    console.log('Valor convertido em centavos:', paraCentavos(dados.valor));
+
     setErros(novosErros);
 
     const primeiroErro = Object.keys(novosErros)[0];
@@ -225,55 +336,55 @@ export default function Lancamentos() {
       return;
     }
 
-    if (editando) {
-      const atualizado = {
-        ...selecionado,
-        tipo: dados.tipo,
-        descricao: dados.descricao.trim(),
-        valor: (paraCentavos(dados.valor) / 100).toFixed(2),
-        data: dados.data,
-        categoria_id: Number(dados.categoria_id),
-        fonte_destino_id: Number(dados.fonte_destino_id),
-      };
+    try {
+      setOperando(true);
+      setMensagem('');
 
-      setLancamentos((atuais) =>
-        atuais.map((item) =>
-          item.id === selecionado.id ? atualizado : item,
-        ),
-      );
-      setMensagem('Lançamento atualizado nesta demonstração.');
-    } else {
-      const novos = simularCadastro(dados);
+      if (editando) {
+        await atualizarLancamento(selecionado.id, dados);
+        setMensagem('Lançamento atualizado com sucesso.');
+      } else {
+        const criados = await criarLancamento(dados);
 
-      setLancamentos((atuais) => [...atuais, ...novos]);
-      setMensagem(
-        novos.length > 1
-          ? `${novos.length} parcelas criadas nesta demonstração.`
-          : 'Lançamento criado nesta demonstração.',
-      );
+        setMensagem(
+          criados.length > 1
+            ? `${criados.length} parcelas criadas com sucesso.`
+            : 'Lançamento criado com sucesso.',
+        );
+      }
+
+      setPagina(1);
+      setRecarregar((atual) => atual + 1);
+      fecharModal();
+    } catch (erro) {
+      setErros(erro.erros ?? {});
+      setMensagem(erro.message);
+    } finally {
+      setOperando(false);
     }
-
-    setPagina(1);
-    fecharModal();
   }
 
-  function excluir(todas) {
-    setLancamentos((atuais) =>
-      atuais.filter((item) => {
-        if (todas && selecionado.grupo_parcelamento) {
-          return item.grupo_parcelamento !== selecionado.grupo_parcelamento;
-        }
+  async function excluir(todas) {
+    try {
+      setOperando(true);
+      setMensagem('');
 
-        return item.id !== selecionado.id;
-      }),
-    );
-    setMensagem(
-      todas
-        ? 'Todas as parcelas da compra foram excluídas nesta demonstração.'
-        : 'Lançamento excluído nesta demonstração.',
-    );
-    setPagina(1);
-    fecharModal();
+      if (todas && selecionado.grupo_parcelamento) {
+        await excluirGrupoParcelamento(selecionado.grupo_parcelamento);
+        setMensagem('Todas as parcelas foram excluídas com sucesso.');
+      } else {
+        await excluirLancamento(selecionado.id);
+        setMensagem('Lançamento excluído com sucesso.');
+      }
+
+      setPagina(1);
+      setRecarregar((atual) => atual + 1);
+      fecharModal();
+    } catch (erro) {
+      setMensagem(erro.message);
+    } finally {
+      setOperando(false);
+    }
   }
 
   return (
@@ -300,11 +411,6 @@ export default function Lancamentos() {
             <span aria-hidden="true">＋</span> Novo lançamento
           </button>
         </div>
-
-        <p className="lc-aviso">
-          Demonstração do frontend: os dados são temporários e não são
-          enviados ao banco.
-        </p>
 
         <section className="lc-painel" aria-labelledby="titulo-filtros">
           <div className="lc-secao-topo">
@@ -371,7 +477,7 @@ export default function Lancamentos() {
               onChange={alterarFiltro}
             >
               <option value="">Todas</option>
-              {fontesDestinosDemo.map((item) => (
+              {fontesDestinos.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.nome}
                 </option>
@@ -388,7 +494,7 @@ export default function Lancamentos() {
           {[
             ['Total de entradas', totais.entrada],
             ['Total de saídas', totais.saida],
-            ['Saldo', totais.entrada - totais.saida],
+            ['Saldo', totais.saldo],
           ].map(([titulo, valor]) => (
             <article className="lc-painel lc-total" key={titulo}>
               <h2>{titulo}</h2>
@@ -403,7 +509,12 @@ export default function Lancamentos() {
           <div className="lc-secao-topo">
             <h2 id="titulo-listagem">Lançamentos</h2>
             <span className="lc-texto-secundario">
-              {filtrados.length} resultado(s)
+              {totalPaginas > 0
+                ? `${(paginaAtual - 1) * POR_PAGINA + 1}–${Math.min(
+                    paginaAtual * POR_PAGINA,
+                    totalRegistros,
+                  )} de ${totalRegistros} resultado(s)`
+                : '0 resultado(s)'}
             </span>
           </div>
 
@@ -435,7 +546,7 @@ export default function Lancamentos() {
                     <td className="lc-numero">
                       {formatarMoeda(paraCentavos(item.valor))}
                     </td>
-                    <td>{nomeCategoria(item.categoria_id)}</td>
+                    <td>{nomeCategoria(item.categoria_id, categorias)}</td>
                     <td>
                       <button
                         type="button"
@@ -464,8 +575,8 @@ export default function Lancamentos() {
 
           <nav className="lc-paginacao" aria-label="Paginação dos lançamentos">
             <span className="lc-texto-secundario">
-              {filtrados.length > 0
-                ? `${inicio + 1}–${Math.min(inicio + POR_PAGINA, filtrados.length)} de ${filtrados.length}`
+              {totalRegistros > 0
+                ? `${inicio + 1}–${Math.min(inicio + POR_PAGINA, totalRegistros)} de ${totalRegistros}`
                 : '0 resultados'}
             </span>
 
@@ -479,7 +590,7 @@ export default function Lancamentos() {
                 Anterior
               </button>
               <span aria-live="polite">
-                {paginaAtual} de {totalPaginas}
+                {totalPaginas > 0 ? `${paginaAtual} de ${totalPaginas}` : '0 de 0'}
               </span>
               <button
                 type="button"
@@ -609,7 +720,7 @@ export default function Lancamentos() {
                 required
               >
                 <option value="">Selecione</option>
-                {fontesDestinosDemo.map((item) => (
+                {fontesDestinos.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.nome}
                   </option>
@@ -657,8 +768,13 @@ export default function Lancamentos() {
               <button
                 type="submit"
                 className="lc-botao lc-botao--principal"
+                disabled={operando}
               >
-                {editando ? 'Salvar alterações' : 'Salvar'}
+                {operando
+                  ? 'Salvando...'
+                  : editando
+                    ? 'Salvar alterações'
+                    : 'Salvar'}
               </button>
             </div>
           </form>
@@ -673,8 +789,8 @@ export default function Lancamentos() {
                 ['Descrição', selecionado.descricao],
                 ['Valor', formatarMoeda(paraCentavos(selecionado.valor))],
                 ['Data', formatarData(selecionado.data)],
-                ['Categoria', nomeCategoria(selecionado.categoria_id)],
-                ['Fonte/Destino', nomeFonte(selecionado.fonte_destino_id)],
+                ['Categoria', nomeCategoria(selecionado.categoria_id, categorias)],
+                ['Fonte/Destino', nomeFonte(selecionado.fonte_destino_id, fontesDestinos)], 
                 [
                   'Parcelamento',
                   selecionado.total_parcelas > 1
