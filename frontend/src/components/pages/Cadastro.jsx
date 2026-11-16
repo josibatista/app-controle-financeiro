@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Campo from '../Campo.jsx';
-import Icone from '../Icone.jsx';
-import LayoutAcesso from '../LayoutAcesso.jsx';
+import Campo from './Campo.jsx';
+import Icone from './Icone.jsx';
+import LayoutAcesso from './LayoutAcesso.jsx';
 import { formatarCpf } from '../../services/cpf.js';
 import { validarCadastro, validarCampoCadastro } from '../../services/validarCadastro.js';
 import './Cadastro.css';
