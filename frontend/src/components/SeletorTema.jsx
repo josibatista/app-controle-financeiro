@@ -1,4 +1,4 @@
-import { useTheme } from '../../contexts/ThemeContext.jsx';
+import { useTheme } from '../contexts/ThemeContext.jsx';
 import Icone from './Icone.jsx';
 
 export default function SeletorTema({ somenteIcones = false }) {

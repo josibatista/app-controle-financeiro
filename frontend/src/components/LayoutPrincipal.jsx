@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import MenuLateral from './MenuLateral.jsx';
 import SeletorTema from './SeletorTema.jsx';
-import { lerMenuMinimizado, salvarMenuMinimizado } from '../../services/menu.js';
+import { lerMenuMinimizado, salvarMenuMinimizado } from '../services/menu.js';
 import './LayoutPrincipal.css';
 
 export default function LayoutPrincipal() {

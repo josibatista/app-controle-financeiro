@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Campo from './Campo.jsx';
-import Icone from './Icone.jsx';
-import LayoutAcesso from './LayoutAcesso.jsx';
+import Campo from '../Campo.jsx';
+import Icone from '../Icone.jsx';
+import LayoutAcesso from '../LayoutAcesso.jsx';
 
 export default function Login() {
   const [dados, setDados] = useState({ email: '', senha: '' });
