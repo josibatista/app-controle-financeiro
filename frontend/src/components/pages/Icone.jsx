@@ -17,6 +17,8 @@ export default function Icone({ nome }) {
     sair: <><path d="M9 4H4v16h5M10 12h11m-4-4 4 4-4 4" /></>,
     menu: <path d="M3 6h18M3 12h18M3 18h18" />,
     fechar: <path d="m6 6 12 12M6 18 18 6" />,
+    painelExpandir: <><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M9 4v16m4-11 3 3-3 3" /></>,
+    painelRecolher: <><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M9 4v16m7-11-3 3 3 3" /></>,
     mais: <path d="M12 5v14M5 12h14" />,
     calendario: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 11h18" /></>,
     entrada: <path d="M18 6 6 18M6 8v10h10" />,
