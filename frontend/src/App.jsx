@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import Login from './components/Login.jsx';
-import Cadastro from './components/Cadastro.jsx';
+import Login from './components/pages/Login.jsx';
+import Cadastro from './components/pages/Cadastro.jsx';
+import Relatorio from './components/pages/Relatorio.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 
 export default function App() {
@@ -9,6 +10,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/relatorio" element={<Relatorio />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </ThemeProvider>
