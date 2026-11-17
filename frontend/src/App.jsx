@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import LayoutPrincipal from './components/LayoutPrincipal.jsx';
 import { itensMenu } from './components/MenuLateral.jsx';
 import Inicio from './components/pages/Inicio.jsx';
+import Perfil from './components/pages/Perfil.jsx';
 
 // As telas do grupo serão conectadas a estas rotas em uma próxima integração.
 function AreaReservada({ titulo }) {
@@ -23,7 +24,7 @@ export default function App() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route element={<LayoutPrincipal />}>
           <Route path="/inicio" element={<Inicio />} />
-          <Route path="/meu-perfil" element={<AreaReservada titulo="Meu perfil" />} />
+          <Route path="/meu-perfil" element={<Perfil />} />
           {itensMenu.map(({ caminho, rotulo }) => (
             <Route key={caminho} path={caminho} element={<AreaReservada titulo={rotulo} />} />
           ))}
