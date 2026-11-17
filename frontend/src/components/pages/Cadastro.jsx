@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import Campo from '../Campo.jsx';
@@ -9,92 +9,49 @@ import { validarCadastro, validarCampoCadastro } from '../../services/validarCad
 import './Cadastro.css';
 import '../Acesso.css';
 
+const cadastroVazio = { nome: '', email: '', cpf: '', senha: '', confirmacaoSenha: '' };
+
 export default function Cadastro() {
-  const [dados, setDados] = useState({
-    nome: '',
-    email: '',
-    cpf: '',
-    senha: '',
-    confirmacaoSenha: '',
-  });
+  const [dados, setDados] = useState(cadastroVazio);
   const [erros, setErros] = useState({});
-  const [tocados, setTocados] = useState({});
   const [sucesso, setSucesso] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [enviando, setEnviando] = useState(false);
-  const requisicao = useRef(null);
-  const formularioRef = useRef(null);
-  const campoParaFocar = useRef(null);
   const { cadastrar, status } = useAuth();
-
-  useEffect(() => () => requisicao.current?.abort(), []);
-  useEffect(() => {
-    if (!enviando && campoParaFocar.current) {
-      formularioRef.current?.elements.namedItem(campoParaFocar.current)?.focus();
-      campoParaFocar.current = null;
-    }
-  }, [enviando]);
 
   function alterar(event) {
     const { name, value } = event.target;
-    const proximos = { ...dados, [name]: name === 'cpf' ? formatarCpf(value) : value };
-    setDados(proximos);
+    // O CPF recebe a máscara 000.000.000-00 enquanto é digitado.
+    const novoValor = name === 'cpf' ? formatarCpf(value) : value;
+    setDados({ ...dados, [name]: novoValor });
     setMensagem('');
-
-    if (tocados[name] || (name === 'senha' && tocados.confirmacaoSenha)) {
-      setErros((atuais) => {
-        const novos = { ...atuais };
-        if (tocados[name]) novos[name] = validarCampoCadastro(name, proximos);
-        if (name === 'senha' && tocados.confirmacaoSenha) {
-          novos.confirmacaoSenha = validarCampoCadastro('confirmacaoSenha', proximos);
-        }
-        return novos;
-      });
-    }
   }
 
+  // Valida o campo quando o usuário sai dele.
   function validarAoSair(event) {
     const { name } = event.target;
-    setTocados((atuais) => ({ ...atuais, [name]: true }));
-    setErros((atuais) => ({ ...atuais, [name]: validarCampoCadastro(name, dados) }));
+    setErros({ ...erros, [name]: validarCampoCadastro(name, dados) });
   }
 
-  async function conferir(event) {
+  async function enviar(event) {
     event.preventDefault();
-    if (requisicao.current) return;
-    const formulario = event.currentTarget;
+
     const novosErros = validarCadastro(dados);
     setErros(novosErros);
-    setTocados(Object.fromEntries(Object.keys(dados).map((campo) => [campo, true])));
-    const primeiroCampo = Object.keys(novosErros)[0];
     setMensagem('');
-    if (primeiroCampo) {
-      formulario.elements.namedItem(primeiroCampo)?.focus();
-      return;
-    }
-    const controlador = new AbortController();
-    requisicao.current = controlador;
+    if (Object.keys(novosErros).length) return;
+
     setEnviando(true);
     try {
-      await cadastrar(dados, { signal: controlador.signal });
-      if (controlador.signal.aborted) return;
-      setDados({ nome: '', email: '', cpf: '', senha: '', confirmacaoSenha: '' });
+      await cadastrar(dados);
+      setDados(cadastroVazio);
       setSucesso(true);
     } catch (erro) {
-      if (erro.name === 'AbortError' || controlador.signal.aborted) return;
-      const campos = Object.fromEntries(
-        Object.entries(erro.erros ?? {}).filter(([campo]) => Object.hasOwn(dados, campo)),
-      );
-      setErros(campos);
-      setMensagem(
-        [404, 501, 503].includes(erro.status)
-          ? 'O cadastro está indisponível no momento. Tente novamente mais tarde.'
-          : erro.message || 'Não foi possível criar sua conta. Tente novamente.',
-      );
-      campoParaFocar.current = Object.keys(campos)[0];
+      // Erros do servidor, como e-mail ou CPF já cadastrado (409), aparecem no campo.
+      setErros(erro.erros || {});
+      setMensagem(erro.message);
     } finally {
-      requisicao.current = null;
-      if (!controlador.signal.aborted) setEnviando(false);
+      setEnviando(false);
     }
   }
 
@@ -108,23 +65,13 @@ export default function Cadastro() {
     >
       {sucesso ? (
         <div className="fl-acesso-sucesso">
-          <p role="status">Conta criada com sucesso.</p>
-          <Link
-            className="fl-text-button"
-            to="/login"
-            state={{ cadastroConcluido: true }}
-          >
+          <p>Conta criada com sucesso.</p>
+          <Link className="fl-text-button" to="/login" state={{ cadastroConcluido: true }}>
             Entrar na minha conta
           </Link>
         </div>
       ) : (
-        <form
-          className="fl-form"
-          ref={formularioRef}
-          onSubmit={conferir}
-          noValidate
-          aria-busy={enviando}
-        >
+        <form className="fl-form" onSubmit={enviar} noValidate>
           <fieldset disabled={enviando}>
             <Campo
               id="cadastro-nome"
@@ -146,8 +93,6 @@ export default function Cadastro() {
               label="E-mail"
               type="email"
               autoComplete="email"
-              autoCapitalize="none"
-              spellCheck={false}
               maxLength={160}
               placeholder="voce@exemplo.com"
               value={dados.email}
@@ -209,16 +154,7 @@ export default function Cadastro() {
               <Icone nome="seta" />
             </button>
           </fieldset>
-          {enviando && (
-            <p className="fl-acesso-status" role="status">
-              Enviando seu cadastro...
-            </p>
-          )}
-          {mensagem && (
-            <p className="fl-alert" role="alert">
-              {mensagem}
-            </p>
-          )}
+          {mensagem && <p className="fl-alert">{mensagem}</p>}
         </form>
       )}
       <p className="fl-switch">

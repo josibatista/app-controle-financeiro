@@ -74,7 +74,7 @@ npm ci
 **5.** Crie um arquivo `.env` na pasta `backend/`, utilizando o `.env.example` como referência. Configure a variável de conexão com os dados fornecidos pelo Supabase:
 
 ```dotenv
-DATABASE_URL=postgresql://postgres.PROJECT_REF:SUA_SENHA@HOST.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://postgres.PROJECT_REF:SUA_SENHA@HOST.pooler.supabase.com:5432/postgres?uselibpqcompat=true&sslmode=require
 ```
 
 Substitua os valores de exemplo pelas informações do seu projeto no Supabase, incluindo a senha definida na criação. Configure também as demais variáveis indicadas no `.env.example`. Se já existir um `.env`, preserve a conexão do grupo e acrescente somente o que estiver faltando.
@@ -94,7 +94,7 @@ JWT_SECRET=
 FRONTEND_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-A conexão pode apontar para o PostgreSQL local ou para o Supabase. Em `FRONTEND_ORIGINS`, informe as origens autorizadas separadas por vírgula, sem caminhos ou barra final. No Codespaces, a origem exata da porta 5173 é incluída automaticamente quando `CODESPACE_NAME` está disponível; se necessário, informe a URL da porta em `FRONTEND_ORIGINS`.
+A conexão pode apontar para o PostgreSQL local ou para o Supabase. Em `FRONTEND_ORIGINS`, informe as origens autorizadas separadas por vírgula, sem caminhos ou barra final.
 
 
 **6.** Execute o script de criação das tabelas:
@@ -105,7 +105,7 @@ npm run db:setup
 
 Esse comando executa o `schema.sql`, criando as tabelas, os relacionamentos e as restrições necessárias no PostgreSQL hospedado no Supabase.
 
-**7.** Opcionalmente, popule um banco de desenvolvimento com os dados de demonstração:
+**7.** Popule o banco com os dados de demonstração (necessário para a apresentação):
 
 ```bash
 node database/seed.js
@@ -163,11 +163,11 @@ npm run dev
 
 O servidor usa a porta 3000 por padrão. O comando `npm start` inicia a API sem o modo de observação. Deixe o terminal do backend aberto e execute o frontend em um segundo terminal.
 
-Se o servidor informar que o segredo JWT está ausente ou é curto demais, confira `backend/.env`. A variável `NODE_ENV=test` é usada somente nos testes; ela impede que o arquivo `server.js` abra a porta automaticamente. A função `criarApp` permanece nesse arquivo.
+Se o servidor informar que o `JWT_SECRET` não foi definido, confira o arquivo `backend/.env`.
 
 ## Autenticação e telas
 
-Abra `/cadastro` para criar uma conta e `/login` para entrar. O cadastro valida nome, e-mail, CPF com dígitos verificadores, senha e confirmação. A senha precisa ter no mínimo oito caracteres, com letras e números. O limite de 72 bytes evita o truncamento feito pelo bcrypt.
+Abra `/cadastro` para criar uma conta e `/login` para entrar. O cadastro valida nome, e-mail, CPF com dígitos verificadores, senha e confirmação. A senha precisa ter no mínimo oito caracteres, com letras e números.
 
 O cadastro grava o usuário, as categorias padrão e a conta corrente na mesma transação. E-mail ou CPF duplicado retorna 409, com o erro no campo correspondente. As senhas ficam armazenadas como hash com salt e não são devolvidas pela API.
 
@@ -217,16 +217,10 @@ As respostas de erro usam `mensagem` e, quando houver erros em campos, `erros`:
 }
 ```
 
-Os códigos usados incluem 400 para dados inválidos, 401 para acesso inválido ou expirado, 403 para origem não autorizada, 404 para registro ou rota não encontrados, 409 para duplicidade ou exclusão de registro vinculado, 413 para corpo muito grande e 429 para excesso de tentativas de login. Falhas internas retornam 500 com uma mensagem genérica. Criações retornam 201; exclusões concluídas retornam 204 sem corpo.
+Os códigos usados incluem 400 para dados inválidos, 401 para acesso inválido ou expirado, 404 para registro ou rota não encontrados, 409 para duplicidade ou exclusão de registro vinculado e 429 para excesso de tentativas de login. Falhas internas retornam 500 com uma mensagem genérica. Criações retornam 201; exclusões concluídas retornam 204 sem corpo.
 
 ## Organização
 
 Em `backend/src/`, `server.js` monta e inicia a aplicação. As únicas subpastas são `routes/`, `models/`, `middlewares/` e `config/`. Os controladores ficam nos próprios arquivos de rotas. As validações puras de usuário, incluindo CPF, ficam em `models/validarUsuario.js`.
 
 No frontend, as telas ficam em `src/components/pages/`, os componentes compartilhados em `src/components/`, os contextos em `src/contexts/` e os clientes da API e utilitários em `src/services/`.
-
-## Testes opcionais
-
-Na pasta `backend`, execute `npm test` para conferir as validações. Para executar também os testes de integração, defina `TEST_DATABASE_URL` com uma conexão PostgreSQL de testes antes do comando. Os testes criam e removem um schema isolado, sem usar as tabelas do schema público. A conexão precisa permitir criar e remover schemas.
-
-Se `TEST_DATABASE_URL` não estiver definida, o teste de integração é indicado como ignorado. A variável `NODE_ENV=test` é definida pelo arquivo de testes para importar `criarApp` sem iniciar o servidor automaticamente. Os testes não são necessários para iniciar a aplicação.

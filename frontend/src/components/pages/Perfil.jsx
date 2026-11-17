@@ -51,21 +51,17 @@ export default function Perfil() {
     document.title = 'Meu perfil';
   }, []);
 
+  // Busca os dados do perfil ao abrir a tela.
   useEffect(() => {
-    const controlador = new AbortController();
     setCarregamento({ status: 'carregando', erro: '' });
-    consultarPerfil({ signal: controlador.signal })
+
+    consultarPerfil()
       .then((usuario) => {
         setPerfil(usuario);
         setDados({ nome: usuario.nome, email: usuario.email });
         setCarregamento({ status: 'pronto', erro: '' });
       })
-      .catch((erro) => {
-        if (erro.name !== 'AbortError') {
-          setCarregamento({ status: 'erro', erro: erro.message });
-        }
-      });
-    return () => controlador.abort();
+      .catch((erro) => setCarregamento({ status: 'erro', erro: erro.message }));
   }, [tentativa]);
 
   const dadosAlterados =
@@ -187,21 +183,21 @@ export default function Perfil() {
 
   if (carregamento.status !== 'pronto') {
     return (
-      <section className="fl-perfil" aria-labelledby="titulo-perfil">
-        <h1 id="titulo-perfil">Meu perfil</h1>
+      <section className="fl-perfil">
+        <h1>Meu perfil</h1>
         {carregamento.status === 'carregando' ? (
-          <p className="fl-perfil-aviso" role="status">
+          <p className="fl-perfil-aviso">
             Carregando seus dados...
           </p>
         ) : (
           <div className="fl-perfil-aviso">
-            <p className="fl-alert" role="alert">
+            <p className="fl-alert">
               {carregamento.erro}
             </p>
             <button
               className="fl-text-button"
               type="button"
-              onClick={() => setTentativa((valor) => valor + 1)}
+              onClick={() => setTentativa(tentativa + 1)}
             >
               Tentar novamente
             </button>
@@ -212,13 +208,13 @@ export default function Perfil() {
   }
 
   return (
-    <section className="fl-perfil" aria-labelledby="titulo-perfil">
-      <h1 id="titulo-perfil">Meu perfil</h1>
+    <section className="fl-perfil">
+      <h1>Meu perfil</h1>
       <p className="fl-perfil-descricao">Gerencie seus dados e o acesso à sua conta.</p>
 
-      <section className="fl-perfil-secao" aria-labelledby="titulo-dados-pessoais">
+      <section className="fl-perfil-secao">
         <div className="fl-perfil-secao-titulo">
-          <h2 id="titulo-dados-pessoais">Dados pessoais</h2>
+          <h2>Dados pessoais</h2>
           <p>Informações usadas no seu cadastro.</p>
         </div>
         <form className="fl-perfil-formulario" onSubmit={salvarDados} noValidate>
@@ -286,21 +282,21 @@ export default function Perfil() {
             </button>
           </div>
           {sucesso && (
-            <p className="fl-perfil-status" role="status">
+            <p className="fl-perfil-status">
               {sucesso}
             </p>
           )}
           {mensagem && (
-            <p className="fl-alert" role="alert">
+            <p className="fl-alert">
               {mensagem}
             </p>
           )}
         </form>
       </section>
 
-      <section className="fl-perfil-secao" aria-labelledby="titulo-alterar-senha">
+      <section className="fl-perfil-secao">
         <div className="fl-perfil-secao-titulo">
-          <h2 id="titulo-alterar-senha">Alterar senha</h2>
+          <h2>Alterar senha</h2>
           <p>Escolha uma nova senha para acessar sua conta.</p>
         </div>
         <form className="fl-perfil-formulario" onSubmit={salvarSenha} noValidate>
@@ -361,12 +357,12 @@ export default function Perfil() {
             </button>
           </div>
           {sucessoSenha && (
-            <p className="fl-perfil-status" role="status">
+            <p className="fl-perfil-status">
               {sucessoSenha}
             </p>
           )}
           {mensagemSenha && (
-            <p className="fl-alert" role="alert">
+            <p className="fl-alert">
               {mensagemSenha}
             </p>
           )}

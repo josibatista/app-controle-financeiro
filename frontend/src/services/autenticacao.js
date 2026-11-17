@@ -1,10 +1,9 @@
 import { api } from './api.js';
 
-export function cadastrarUsuario(dados, { signal } = {}) {
+export function cadastrarUsuario(dados) {
   return api('/auth/cadastro', {
     method: 'POST',
     publica: true,
-    signal,
     body: {
       nome: dados.nome.trim(),
       email: dados.email.trim().toLowerCase(),
@@ -15,11 +14,10 @@ export function cadastrarUsuario(dados, { signal } = {}) {
   });
 }
 
-export async function entrar(dados, { signal } = {}) {
+export async function entrar(dados) {
   const resposta = await api('/auth/login', {
     method: 'POST',
     publica: true,
-    signal,
     body: {
       email: dados.email.trim().toLowerCase(),
       senha: dados.senha,
@@ -28,18 +26,12 @@ export async function entrar(dados, { signal } = {}) {
   return resposta.token;
 }
 
-export async function consultarUsuario({ signal } = {}) {
-  const dados = await api('/auth/me', { signal });
-  return {
-    id: dados.id,
-    nome: dados.nome,
-    email: dados.email,
-    expiraEm: dados.expiraEm,
-  };
+export function consultarUsuario() {
+  return api('/auth/me');
 }
 
-export function consultarPerfil({ signal } = {}) {
-  return api('/auth/perfil', { signal });
+export function consultarPerfil() {
+  return api('/auth/perfil');
 }
 
 export function atualizarPerfil(dados) {

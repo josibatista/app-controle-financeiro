@@ -26,52 +26,48 @@ export default function Inicio() {
   const hoje = new Date();
   const [mes, setMes] = useState(hoje.getMonth() + 1);
   const [ano, setAno] = useState(hoje.getFullYear());
+  const [resumo, setResumo] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
   const [tentativa, setTentativa] = useState(0);
-  const [consulta, setConsulta] = useState({
-    chave: '',
-    status: 'carregando',
-    dados: null,
-    erro: '',
-  });
-  const chave = `${ano}-${mes}`;
-  const atual =
-    consulta.chave === chave ? consulta : { status: 'carregando', dados: null };
-  const anos = Array.from({ length: 5 }, (_, indice) => hoje.getFullYear() - 2 + indice);
-  const resumo = atual.dados;
+
+  const anos = [];
+  for (let valor = hoje.getFullYear() - 2; valor <= hoje.getFullYear() + 2; valor += 1) {
+    anos.push(valor);
+  }
+
+  useEffect(() => {
+    document.title = 'Resumo do mês';
+  }, []);
+
+  // Busca o resumo sempre que o mês ou o ano mudam.
+  useEffect(() => {
+    setCarregando(true);
+    setErro('');
+
+    consultarResumo(ano, mes)
+      .then((dados) => setResumo(dados))
+      .catch((erroConsulta) => {
+        setResumo(null);
+        setErro(erroConsulta.message);
+      })
+      .finally(() => setCarregando(false));
+  }, [ano, mes, tentativa]);
+
   const indicadores = [
     { rotulo: 'Entradas', valor: resumo?.totalEntradas, icone: 'entrada' },
     { rotulo: 'Saídas', valor: resumo?.totalSaidas, icone: 'saida' },
     { rotulo: 'Saldo do mês', valor: resumo?.saldo, icone: 'saldo', saldo: true },
   ];
 
-  useEffect(() => {
-    document.title = 'Resumo do mês';
-  }, []);
-  useEffect(() => {
-    const controlador = new AbortController();
-    setConsulta({ chave, status: 'carregando', dados: null, erro: '' });
-    consultarResumo(ano, mes, { signal: controlador.signal })
-      .then((dados) => {
-        if (!controlador.signal.aborted)
-          setConsulta({ chave, status: 'pronto', dados, erro: '' });
-      })
-      .catch((erro) => {
-        if (!controlador.signal.aborted && erro.name !== 'AbortError') {
-          setConsulta({ chave, status: 'erro', dados: null, erro: erro.message });
-        }
-      });
-    return () => controlador.abort();
-  }, [ano, mes, chave, tentativa]);
+  const semMovimentacao =
+    !carregando && resumo && resumo.totalEntradas === 0 && resumo.totalSaidas === 0;
 
   return (
-    <section
-      className="fl-inicio"
-      aria-labelledby="titulo-inicio"
-      aria-busy={atual.status === 'carregando'}
-    >
+    <section className="fl-inicio">
       <div className="fl-inicio-cabecalho">
         <div>
-          <h1 id="titulo-inicio">Resumo do mês</h1>
+          <h1>Resumo do mês</h1>
           <p className="fl-inicio-descricao">
             Olá, {usuario.nome.split(' ')[0]}! Veja como estão suas finanças.
           </p>
@@ -81,7 +77,7 @@ export default function Inicio() {
           <span>Ver lançamentos</span>
         </Link>
       </div>
-      <div className="fl-inicio-periodo" role="group" aria-label="Período do resumo">
+      <div className="fl-inicio-periodo">
         <label className="fl-inicio-mes">
           <Icone nome="calendario" />
           <span className="fl-inicio-sr">Mês</span>
@@ -104,52 +100,37 @@ export default function Inicio() {
           </select>
         </label>
       </div>
-      <dl
-        className="fl-inicio-resumo"
-        aria-live="polite"
-        aria-atomic="true"
-        aria-label={`Resumo de ${meses[mes - 1]} de ${ano}`}
-      >
+      <dl className="fl-inicio-resumo">
         {indicadores.map(({ rotulo, valor, icone, saldo }) => (
           <div
-            className={`fl-resumo-item${saldo ? ' fl-resumo-item--saldo' : ''}`}
+            className={saldo ? 'fl-resumo-item fl-resumo-item--saldo' : 'fl-resumo-item'}
             key={rotulo}
           >
             <dt>
               <span>{rotulo}</span>
               <Icone nome={icone} />
             </dt>
-            <dd>{valor === undefined ? '—' : moeda.format(valor)}</dd>
+            <dd>{carregando || valor === undefined ? '—' : moeda.format(valor)}</dd>
           </div>
         ))}
       </dl>
-      {atual.status === 'carregando' && (
-        <p className="fl-inicio-status" role="status">
-          Carregando o resumo...
-        </p>
-      )}
-      {atual.status === 'erro' && (
+      {carregando && <p className="fl-inicio-status">Carregando o resumo...</p>}
+      {erro && (
         <div className="fl-inicio-retorno">
-          <p className="fl-alert" role="alert">
-            {atual.erro}
-          </p>
+          <p className="fl-alert">{erro}</p>
           <button
             className="fl-text-button"
             type="button"
-            onClick={() => setTentativa((valor) => valor + 1)}
+            onClick={() => setTentativa(tentativa + 1)}
           >
             Tentar novamente
           </button>
         </div>
       )}
-      {atual.status === 'pronto' &&
-        resumo.totalEntradas === 0 &&
-        resumo.totalSaidas === 0 && (
-          <p className="fl-inicio-status" role="status">
-            Nenhuma movimentação neste período.
-          </p>
-        )}
-      <div className="fl-inicio-area-reservada" aria-hidden="true" />
+      {semMovimentacao && (
+        <p className="fl-inicio-status">Nenhuma movimentação neste período.</p>
+      )}
+      <div className="fl-inicio-area-reservada" />
     </section>
   );
 }
