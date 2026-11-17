@@ -1,0 +1,7 @@
+:root .fl-acesso-status { margin-top: 18px; color: var(--fl-secondary); font-size: 13px; }
+.fl-acesso-acoes { display: grid; justify-items: start; gap: 12px; margin-top: 22px; }
+:root .fl-form fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+:root .fl-form fieldset:disabled .fl-input { opacity: .75; }
+:root .fl-acesso-sucesso { margin-top: 28px; color: var(--fl-text); }
+:root .fl-acesso-sucesso p { margin-bottom: 15px; }
+:root .fl-menu-sair { width: 100%; border: 0; border-top: 1px solid var(--fl-line); background: transparent; font: inherit; }
