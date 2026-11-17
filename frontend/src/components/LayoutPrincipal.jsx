@@ -8,13 +8,20 @@ import './LayoutPrincipal.css';
 export default function LayoutPrincipal() {
   const dialogo = useRef(null);
   const [minimizado, setMinimizado] = useState(lerMenuMinimizado);
-  const [telaPequena, setTelaPequena] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 480px)').matches);
+  const [telaPequena, setTelaPequena] = useState(
+    () =>
+      typeof window !== 'undefined' && window.matchMedia('(max-width: 480px)').matches,
+  );
 
-  useEffect(() => { salvarMenuMinimizado(minimizado); }, [minimizado]);
+  useEffect(() => {
+    salvarMenuMinimizado(minimizado);
+  }, [minimizado]);
 
   useEffect(() => {
     const consulta = window.matchMedia('(max-width: 480px)');
-    function atualizarTela() { setTelaPequena(consulta.matches); }
+    function atualizarTela() {
+      setTelaPequena(consulta.matches);
+    }
     atualizarTela();
     consulta.addEventListener('change', atualizarTela);
     return () => consulta.removeEventListener('change', atualizarTela);
@@ -29,12 +36,18 @@ export default function LayoutPrincipal() {
     }
   }, [telaPequena, minimizado]);
 
-  function alternarMenu() { setMinimizado((atual) => !atual); }
-  function minimizarMenu() { setMinimizado(true); }
+  function alternarMenu() {
+    setMinimizado((atual) => !atual);
+  }
+  function minimizarMenu() {
+    setMinimizado(true);
+  }
 
   return (
     <div className="fl-app" data-menu={minimizado ? 'minimizado' : 'fixo'}>
-      <a className="fl-pular-menu" href="#conteudo-principal">Ir para o conteúdo</a>
+      <a className="fl-pular-menu" href="#conteudo-principal">
+        Ir para o conteúdo
+      </a>
       <aside className="fl-sidebar-desktop" aria-label="Navegação lateral">
         <MenuLateral minimizado={telaPequena || minimizado} aoAlternar={alternarMenu} />
       </aside>
@@ -46,7 +59,18 @@ export default function LayoutPrincipal() {
           <Outlet />
         </main>
       </div>
-      <dialog className="fl-menu-dialogo" aria-label="Menu principal" ref={dialogo} onCancel={(event) => { event.preventDefault(); minimizarMenu(); }} onClick={(event) => { if (event.target === event.currentTarget) minimizarMenu(); }}>
+      <dialog
+        className="fl-menu-dialogo"
+        aria-label="Menu principal"
+        ref={dialogo}
+        onCancel={(event) => {
+          event.preventDefault();
+          minimizarMenu();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) minimizarMenu();
+        }}
+      >
         <MenuLateral aoAlternar={minimizarMenu} aoNavegar={minimizarMenu} focoInicial />
       </dialog>
     </div>

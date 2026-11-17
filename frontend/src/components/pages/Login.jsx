@@ -42,11 +42,16 @@ export default function Login() {
       email: validarCampoCadastro('email', dados),
       senha: dados.senha ? '' : 'Informe sua senha.',
     };
-    const novosErros = Object.fromEntries(Object.entries(verificacoes).filter(([, erro]) => Boolean(erro)));
+    const novosErros = Object.fromEntries(
+      Object.entries(verificacoes).filter(([, erro]) => Boolean(erro)),
+    );
     setErros(novosErros);
     setMensagem('');
     const primeiro = Object.keys(novosErros)[0];
-    if (primeiro) { formulario.elements.namedItem(primeiro)?.focus(); return; }
+    if (primeiro) {
+      formulario.elements.namedItem(primeiro)?.focus();
+      return;
+    }
     const controlador = new AbortController();
     requisicao.current = controlador;
     setEnviando(true);
@@ -57,9 +62,16 @@ export default function Login() {
     } catch (erro) {
       if (erro.name === 'AbortError' || controlador.signal.aborted) return;
       if (erro.status === 401) setMensagem('E-mail ou senha inválidos.');
-      else if ([404, 501, 503].includes(erro.status)) setMensagem('O acesso à conta está indisponível no momento. Tente novamente mais tarde.');
+      else if ([404, 501, 503].includes(erro.status))
+        setMensagem(
+          'O acesso à conta está indisponível no momento. Tente novamente mais tarde.',
+        );
       else {
-        const campos = Object.fromEntries(Object.entries(erro.campos ?? {}).filter(([campo]) => ['email', 'senha'].includes(campo)));
+        const campos = Object.fromEntries(
+          Object.entries(erro.campos ?? {}).filter(([campo]) =>
+            ['email', 'senha'].includes(campo),
+          ),
+        );
         setErros(campos);
         setMensagem(erro.message || 'Não foi possível entrar. Tente novamente.');
         campoParaFocar.current = Object.keys(campos)[0];
@@ -74,18 +86,68 @@ export default function Login() {
 
   return (
     <LayoutAcesso titulo="Entre na sua conta" descricao="Acesse seu controle financeiro.">
-      {local.state?.cadastroConcluido && <p className="fl-acesso-status" role="status">Conta criada. Entre para continuar.</p>}
-      <form className="fl-form" ref={formularioRef} onSubmit={enviar} noValidate aria-busy={enviando}>
+      {local.state?.cadastroConcluido && (
+        <p className="fl-acesso-status" role="status">
+          Conta criada. Entre para continuar.
+        </p>
+      )}
+      <form
+        className="fl-form"
+        ref={formularioRef}
+        onSubmit={enviar}
+        noValidate
+        aria-busy={enviando}
+      >
         <fieldset disabled={enviando}>
-          <Campo id="login-email" name="email" label="E-mail" type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={160} placeholder="voce@exemplo.com" value={dados.email} onChange={alterar} erro={erros.email} required />
-          <Campo id="login-senha" name="senha" label="Senha" type="password" autoComplete="current-password" placeholder="Sua senha" value={dados.senha} onChange={alterar} erro={erros.senha} required />
-          <button className="fl-submit" type="submit"><span>{enviando ? 'Entrando...' : 'Entrar'}</span><Icone nome="seta" /></button>
+          <Campo
+            id="login-email"
+            name="email"
+            label="E-mail"
+            type="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={160}
+            placeholder="voce@exemplo.com"
+            value={dados.email}
+            onChange={alterar}
+            erro={erros.email}
+            required
+          />
+          <Campo
+            id="login-senha"
+            name="senha"
+            label="Senha"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Sua senha"
+            value={dados.senha}
+            onChange={alterar}
+            erro={erros.senha}
+            required
+          />
+          <button className="fl-submit" type="submit">
+            <span>{enviando ? 'Entrando...' : 'Entrar'}</span>
+            <Icone nome="seta" />
+          </button>
         </fieldset>
-        {enviando && <p className="fl-acesso-status" role="status">Confirmando seu acesso...</p>}
-        {mensagem && <p className="fl-alert" role="alert">{mensagem}</p>}
+        {enviando && (
+          <p className="fl-acesso-status" role="status">
+            Confirmando seu acesso...
+          </p>
+        )}
+        {mensagem && (
+          <p className="fl-alert" role="alert">
+            {mensagem}
+          </p>
+        )}
       </form>
-      <p className="fl-switch"><span>Ainda não tem uma conta?</span> <Link className="fl-text-button" to="/cadastro">Criar conta</Link></p>
+      <p className="fl-switch">
+        <span>Ainda não tem uma conta?</span>{' '}
+        <Link className="fl-text-button" to="/cadastro">
+          Criar conta
+        </Link>
+      </p>
     </LayoutAcesso>
   );
 }
-

@@ -10,7 +10,13 @@ import './Cadastro.css';
 import '../Acesso.css';
 
 export default function Cadastro() {
-  const [dados, setDados] = useState({ nome: '', email: '', cpf: '', senha: '', confirmacaoSenha: '' });
+  const [dados, setDados] = useState({
+    nome: '',
+    email: '',
+    cpf: '',
+    senha: '',
+    confirmacaoSenha: '',
+  });
   const [erros, setErros] = useState({});
   const [tocados, setTocados] = useState({});
   const [sucesso, setSucesso] = useState(false);
@@ -62,7 +68,10 @@ export default function Cadastro() {
     setTocados(Object.fromEntries(Object.keys(dados).map((campo) => [campo, true])));
     const primeiroCampo = Object.keys(novosErros)[0];
     setMensagem('');
-    if (primeiroCampo) { formulario.elements.namedItem(primeiroCampo)?.focus(); return; }
+    if (primeiroCampo) {
+      formulario.elements.namedItem(primeiroCampo)?.focus();
+      return;
+    }
     const controlador = new AbortController();
     requisicao.current = controlador;
     setEnviando(true);
@@ -73,11 +82,17 @@ export default function Cadastro() {
       setSucesso(true);
     } catch (erro) {
       if (erro.name === 'AbortError' || controlador.signal.aborted) return;
-      const campos = Object.fromEntries(Object.entries(erro.campos ?? {}).filter(([campo]) => Object.hasOwn(dados, campo)));
+      const campos = Object.fromEntries(
+        Object.entries(erro.campos ?? {}).filter(([campo]) =>
+          Object.hasOwn(dados, campo),
+        ),
+      );
       setErros(campos);
-      setMensagem([404, 501, 503].includes(erro.status)
-        ? 'O cadastro está indisponível no momento. Tente novamente mais tarde.'
-        : erro.message || 'Não foi possível criar sua conta. Tente novamente.');
+      setMensagem(
+        [404, 501, 503].includes(erro.status)
+          ? 'O cadastro está indisponível no momento. Tente novamente mais tarde.'
+          : erro.message || 'Não foi possível criar sua conta. Tente novamente.',
+      );
       campoParaFocar.current = Object.keys(campos)[0];
     } finally {
       requisicao.current = null;
@@ -88,25 +103,132 @@ export default function Cadastro() {
   if (status === 'autenticada') return <Navigate to="/inicio" replace />;
 
   return (
-    <LayoutAcesso titulo="Crie sua conta" descricao="Comece a organizar suas finanças." classePrincipal="fl-main--cadastro">
+    <LayoutAcesso
+      titulo="Crie sua conta"
+      descricao="Comece a organizar suas finanças."
+      classePrincipal="fl-main--cadastro"
+    >
       {sucesso ? (
         <div className="fl-acesso-sucesso">
           <p role="status">Conta criada com sucesso.</p>
-          <Link className="fl-text-button" to="/login" state={{ cadastroConcluido: true }}>Entrar na minha conta</Link>
+          <Link
+            className="fl-text-button"
+            to="/login"
+            state={{ cadastroConcluido: true }}
+          >
+            Entrar na minha conta
+          </Link>
         </div>
-      ) : <form className="fl-form" ref={formularioRef} onSubmit={conferir} noValidate aria-busy={enviando}>
-        <fieldset disabled={enviando}>
-        <Campo id="cadastro-nome" name="nome" label="Nome completo" autoComplete="name" maxLength={120} placeholder="Seu nome completo" value={dados.nome} onChange={alterar} onBlur={validarAoSair} erro={erros.nome} marcarObrigatorio required />
-        <Campo id="cadastro-email" name="email" label="E-mail" type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} maxLength={160} placeholder="voce@exemplo.com" value={dados.email} onChange={alterar} onBlur={validarAoSair} erro={erros.email} informacao="Esse e-mail será usado para entrar na conta. Cada e-mail pode ser cadastrado uma única vez." marcarObrigatorio required />
-        <Campo id="cadastro-cpf" name="cpf" label="CPF" inputMode="numeric" autoComplete="off" maxLength={14} placeholder="000.000.000-00" value={dados.cpf} onChange={alterar} onBlur={validarAoSair} erro={erros.cpf} informacao="Cada CPF pode ser cadastrado uma única vez. Digite os 11 números; a pontuação é preenchida automaticamente." marcarObrigatorio required />
-        <Campo id="cadastro-senha" name="senha" label="Senha" type="password" autoComplete="new-password" placeholder="Crie uma senha" value={dados.senha} onChange={alterar} onBlur={validarAoSair} erro={erros.senha} ajuda="Use pelo menos 8 caracteres, com letras e números." informacao="A senha precisa combinar letras e números. Use o ícone de olho para conferir o que digitou." marcarObrigatorio required />
-        <Campo id="cadastro-confirmacao" name="confirmacaoSenha" label="Confirmar senha" type="password" autoComplete="new-password" placeholder="Repita sua senha" value={dados.confirmacaoSenha} onChange={alterar} onBlur={validarAoSair} erro={erros.confirmacaoSenha} marcarObrigatorio required />
-        <button className="fl-submit" type="submit"><span>{enviando ? 'Criando conta...' : 'Criar conta'}</span><Icone nome="seta" /></button>
-        </fieldset>
-        {enviando && <p className="fl-acesso-status" role="status">Enviando seu cadastro...</p>}
-        {mensagem && <p className="fl-alert" role="alert">{mensagem}</p>}
-      </form>}
-      <p className="fl-switch"><span>Já tem uma conta?</span> <Link className="fl-text-button" to="/login">Entrar</Link></p>
+      ) : (
+        <form
+          className="fl-form"
+          ref={formularioRef}
+          onSubmit={conferir}
+          noValidate
+          aria-busy={enviando}
+        >
+          <fieldset disabled={enviando}>
+            <Campo
+              id="cadastro-nome"
+              name="nome"
+              label="Nome completo"
+              autoComplete="name"
+              maxLength={120}
+              placeholder="Seu nome completo"
+              value={dados.nome}
+              onChange={alterar}
+              onBlur={validarAoSair}
+              erro={erros.nome}
+              marcarObrigatorio
+              required
+            />
+            <Campo
+              id="cadastro-email"
+              name="email"
+              label="E-mail"
+              type="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              maxLength={160}
+              placeholder="voce@exemplo.com"
+              value={dados.email}
+              onChange={alterar}
+              onBlur={validarAoSair}
+              erro={erros.email}
+              informacao="Esse e-mail será usado para entrar na conta. Cada e-mail pode ser cadastrado uma única vez."
+              marcarObrigatorio
+              required
+            />
+            <Campo
+              id="cadastro-cpf"
+              name="cpf"
+              label="CPF"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={14}
+              placeholder="000.000.000-00"
+              value={dados.cpf}
+              onChange={alterar}
+              onBlur={validarAoSair}
+              erro={erros.cpf}
+              informacao="Cada CPF pode ser cadastrado uma única vez. Digite os 11 números; a pontuação é preenchida automaticamente."
+              marcarObrigatorio
+              required
+            />
+            <Campo
+              id="cadastro-senha"
+              name="senha"
+              label="Senha"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Crie uma senha"
+              value={dados.senha}
+              onChange={alterar}
+              onBlur={validarAoSair}
+              erro={erros.senha}
+              ajuda="Use pelo menos 8 caracteres, com letras e números."
+              informacao="A senha precisa combinar letras e números. Use o ícone de olho para conferir o que digitou."
+              marcarObrigatorio
+              required
+            />
+            <Campo
+              id="cadastro-confirmacao"
+              name="confirmacaoSenha"
+              label="Confirmar senha"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Repita sua senha"
+              value={dados.confirmacaoSenha}
+              onChange={alterar}
+              onBlur={validarAoSair}
+              erro={erros.confirmacaoSenha}
+              marcarObrigatorio
+              required
+            />
+            <button className="fl-submit" type="submit">
+              <span>{enviando ? 'Criando conta...' : 'Criar conta'}</span>
+              <Icone nome="seta" />
+            </button>
+          </fieldset>
+          {enviando && (
+            <p className="fl-acesso-status" role="status">
+              Enviando seu cadastro...
+            </p>
+          )}
+          {mensagem && (
+            <p className="fl-alert" role="alert">
+              {mensagem}
+            </p>
+          )}
+        </form>
+      )}
+      <p className="fl-switch">
+        <span>Já tem uma conta?</span>{' '}
+        <Link className="fl-text-button" to="/login">
+          Entrar
+        </Link>
+      </p>
     </LayoutAcesso>
   );
 }

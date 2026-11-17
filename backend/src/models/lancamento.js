@@ -1,4 +1,5 @@
 import { pool } from '../config/db.js';
+import { randomUUID } from 'node:crypto';
 
 // Função interna: verifica a posse das entidades relacionadas
 // e a compatibilidade entre categoria e lançamento.
@@ -45,6 +46,68 @@ async function validarRelacionamentos(
   return relacionamento;
 }
 
+function calcularDataParcela(dataInicial, numeroParcela) {
+  const [ano, mes, dia] = dataInicial.split('-').map(Number);
+
+  const dataBase = new Date(
+    Date.UTC(ano, mes - 1 + numeroParcela, 1)
+  );
+
+  const ultimoDia = new Date(
+    Date.UTC(
+      dataBase.getUTCFullYear(),
+      dataBase.getUTCMonth() + 1,
+      0
+    )
+  ).getUTCDate();
+
+  const diaParcela = Math.min(dia, ultimoDia);
+
+  return [
+    dataBase.getUTCFullYear(),
+    String(dataBase.getUTCMonth() + 1).padStart(2, '0'),
+    String(diaParcela).padStart(2, '0'),
+  ].join('-');
+}
+
+
+function calcularValoresParcelas(valorCentavos, totalParcelas) {
+  const valorBase = Math.floor(valorCentavos / totalParcelas);
+  const diferenca = valorCentavos % totalParcelas;
+
+  return Array.from({ length: totalParcelas }, (_, indice) =>
+    valorBase + (indice < diferenca ? 1 : 0)
+  );
+}
+
+function validarValor(valorCentavos) {
+  if (
+    !Number.isSafeInteger(valorCentavos) ||
+    valorCentavos <= 0 ||
+    valorCentavos > 999999999999
+  ) {
+    throw new Error(
+      'O valor do lançamento deve ser positivo e ter até duas casas decimais.'
+    );
+  }
+}
+
+function centavosParaDecimal(valorCentavos) {
+  const inteiro = Math.floor(valorCentavos / 100);
+  const decimal = String(valorCentavos % 100).padStart(2, '0');
+
+  return `${inteiro}.${decimal}`;
+}
+
+function decimalParaCentavos(valorDecimal) {
+  const [inteiro, decimal = ''] = String(valorDecimal).split('.');
+
+  return (
+    Number(inteiro) * 100 +
+    Number(decimal.padEnd(2, '0'))
+  );
+}
+
 export async function listar(
   usuarioId,
   {
@@ -82,23 +145,42 @@ export async function listar(
   adicionarFiltro('categoria_id =', categoriaId);
   adicionarFiltro('fonte_destino_id =', fonteDestinoId);
 
-  valores.push(limite);
-  const parametroLimite = `$${valores.length}`;
+  const where = condicoes.join(' AND ');
 
-  valores.push((pagina - 1) * limite);
-  const parametroOffset = `$${valores.length}`;
+  const resultadoContagem = await db.query(
+    `SELECT COUNT(*) AS total
+     FROM lancamentos
+     WHERE ${where}`,
+    valores
+  );
+
+  const total = Number(resultadoContagem.rows[0].total);
+
+  const valoresPaginacao = [...valores];
+
+  valoresPaginacao.push(limite);
+  const parametroLimite = `$${valoresPaginacao.length}`;
+
+  valoresPaginacao.push((pagina - 1) * limite);
+  const parametroOffset = `$${valoresPaginacao.length}`;
 
   const resultado = await db.query(
     `SELECT *
      FROM lancamentos
-     WHERE ${condicoes.join(' AND ')}
+     WHERE ${where}
      ORDER BY data DESC, id DESC
      LIMIT ${parametroLimite}
      OFFSET ${parametroOffset}`,
-    valores
+    valoresPaginacao
   );
 
-  return resultado.rows;
+  return {
+    dados: resultado.rows,
+    total,
+    pagina,
+    limite,
+    totalPaginas: Math.ceil(total / limite),
+  };
 }
 
 export async function buscarPorId(id, usuarioId, db = pool) {
@@ -159,19 +241,121 @@ export async function criar(
   return resultado.rows[0];
 }
 
+export async function criarParcelado(
+  usuarioId,
+  {
+    tipo,
+    descricao,
+    valorCentavos,
+    data,
+    categoriaId,
+    fonteDestinoId,
+    totalParcelas,
+  }
+) {
+
+  validarValor(valorCentavos);
+  
+  if (
+    !Number.isInteger(totalParcelas) ||
+    totalParcelas < 1 ||
+    totalParcelas > 48
+  ) {
+    throw new Error('O número de parcelas deve estar entre 1 e 48.');
+  }
+
+  const client = await pool.connect();
+  let transacaoIniciada = false;
+
+  try {
+    await client.query('BEGIN');
+    transacaoIniciada = true;
+
+    const relacionamento = await validarRelacionamentos(
+      usuarioId,
+      tipo,
+      categoriaId,
+      fonteDestinoId,
+      client
+    );
+
+    if (
+      totalParcelas > 1 &&
+      relacionamento.fonte_tipo !== 'cartao_credito'
+    ) {
+      const erro = new Error(
+        'O parcelamento só é permitido para cartão de crédito.'
+      );
+
+      erro.code = 'PARCELAMENTO_INVALIDO';
+      throw erro;
+    }
+
+    const grupoParcelamento =
+      totalParcelas > 1 ? randomUUID() : null;
+
+    const valoresParcelas = calcularValoresParcelas(
+      valorCentavos,
+      totalParcelas
+    );
+
+    const lancamentos = [];
+
+    for (let parcelaAtual = 1; parcelaAtual <= totalParcelas; parcelaAtual++) {
+      const resultado = await client.query(
+        `INSERT INTO lancamentos
+           (usuario_id, tipo, descricao, valor, data,
+            categoria_id, fonte_destino_id,
+            parcela_atual, total_parcelas, grupo_parcelamento)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING *`,
+        [
+          usuarioId,
+          tipo,
+          descricao.trim(),
+          centavosParaDecimal(valoresParcelas[parcelaAtual - 1]),
+          calcularDataParcela(data, parcelaAtual - 1),
+          categoriaId,
+          fonteDestinoId,
+          parcelaAtual,
+          totalParcelas,
+          grupoParcelamento,
+        ]
+      );
+
+      lancamentos.push(resultado.rows[0]);
+    }
+
+    await client.query('COMMIT');
+
+    return lancamentos;
+  } catch (erro) {
+    if (transacaoIniciada) {
+      await client.query('ROLLBACK');
+    }
+
+    throw erro;
+  } finally {
+    client.release();
+  }
+}
+
 export async function atualizar(
   id,
   usuarioId,
   {
     tipo,
     descricao,
-    valor,
+    valorCentavos,
     data,
     categoriaId,
     fonteDestinoId,
   },
   db = pool
 ) {
+
+  validarValor(valorCentavos);
+
   await validarRelacionamentos(
     usuarioId,
     tipo,
@@ -193,7 +377,7 @@ export async function atualizar(
     [
       tipo,
       descricao.trim(),
-      valor,
+      centavosParaDecimal(valorCentavos),
       data,
       categoriaId,
       fonteDestinoId,
@@ -227,4 +411,64 @@ export async function excluirGrupo(
   );
 
   return resultado.rowCount;
+}
+
+export async function resumo(
+  usuarioId,
+  {
+    inicio,
+    fim,
+    tipo,
+    categoriaId,
+    fonteDestinoId,
+  },
+  db = pool
+) {
+  const condicoes = ['usuario_id = $1'];
+  const valores = [usuarioId];
+
+  function adicionarFiltro(condicao, valor) {
+    if (valor !== undefined && valor !== null && valor !== '') {
+      valores.push(valor);
+      condicoes.push(`${condicao} $${valores.length}`);
+    }
+  }
+
+  adicionarFiltro('data >=', inicio);
+  adicionarFiltro('data <=', fim);
+  adicionarFiltro('tipo =', tipo);
+  adicionarFiltro('categoria_id =', categoriaId);
+  adicionarFiltro('fonte_destino_id =', fonteDestinoId);
+
+  const resultado = await db.query(
+    `SELECT
+       COALESCE(
+         SUM(CASE WHEN tipo = 'entrada' THEN valor ELSE 0 END),
+         0
+       ) AS total_entradas,
+       COALESCE(
+         SUM(CASE WHEN tipo = 'saida' THEN valor ELSE 0 END),
+         0
+       ) AS total_saidas
+     FROM lancamentos
+     WHERE ${condicoes.join(' AND ')}`,
+    valores
+  );
+
+  const totalEntradasCentavos = decimalParaCentavos(
+    resultado.rows[0].total_entradas
+  );
+
+  const totalSaidasCentavos = decimalParaCentavos(
+    resultado.rows[0].total_saidas
+  );
+
+  const saldoCentavos =
+    totalEntradasCentavos - totalSaidasCentavos;
+
+  return {
+    totalEntradas: totalEntradasCentavos / 100,
+    totalSaidas: totalSaidasCentavos / 100,
+    saldo: saldoCentavos / 100,
+  };
 }

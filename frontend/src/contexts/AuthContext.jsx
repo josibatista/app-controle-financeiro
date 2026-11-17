@@ -1,80 +1,90 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { aoExpirarSessao, lerToken, limparToken, salvarToken } from '../services/api.js';
-import { cadastrarUsuario, consultarUsuario, entrar, expiracaoToken } from '../services/autenticacao.js';
+import { cadastrarUsuario, consultarUsuario, entrar } from '../services/autenticacao.js';
 
 const AuthContext = createContext(null);
-const sessaoAnonima = { status: 'anonima', usuario: null, token: null, erro: '' };
+const sessaoAnonima = { status: 'anonima', usuario: null, expiraEm: null, erro: '' };
 
 export function AuthProvider({ children }) {
-  const [sessao, setSessao] = useState(() => ({ ...sessaoAnonima, status: lerToken() ? 'carregando' : 'anonima' }));
-  const operacao = useRef(0);
+  const [sessao, setSessao] = useState({
+    ...sessaoAnonima,
+    status: lerToken() ? 'carregando' : 'anonima',
+  });
   const consulta = useRef(null);
 
   const logout = useCallback(() => {
-    operacao.current += 1;
     consulta.current?.abort();
     limparToken();
     setSessao(sessaoAnonima);
   }, []);
 
   const restaurarSessao = useCallback(async () => {
-    const atual = ++operacao.current;
     consulta.current?.abort();
     const token = lerToken();
-    if (!token) { setSessao(sessaoAnonima); return; }
-    const validade = expiracaoToken(token);
-    if (validade !== null && validade <= Date.now()) { logout(); return; }
+    if (!token) {
+      setSessao(sessaoAnonima);
+      return;
+    }
+
     const controlador = new AbortController();
     consulta.current = controlador;
     setSessao({ ...sessaoAnonima, status: 'carregando' });
     try {
-      const usuario = await consultarUsuario({ signal: controlador.signal });
-      if (atual === operacao.current && token === lerToken()) {
-        setSessao({ status: 'autenticada', usuario, token, erro: '' });
+      const { expiraEm, ...usuario } = await consultarUsuario({
+        signal: controlador.signal,
+      });
+      if (!controlador.signal.aborted && token === lerToken()) {
+        setSessao({ status: 'autenticada', usuario, expiraEm, erro: '' });
       }
     } catch (erro) {
-      if (erro.name === 'AbortError' || atual !== operacao.current) return;
-      setSessao({ ...sessaoAnonima, status: 'erro', erro: 'Não foi possível confirmar sua sessão. Tente novamente.' });
+      if (controlador.signal.aborted) return;
+      setSessao({
+        ...sessaoAnonima,
+        status: 'erro',
+        erro: 'Não foi possível confirmar sua sessão. Tente novamente.',
+      });
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => aoExpirarSessao(logout), [logout]);
   useEffect(() => {
     restaurarSessao();
-    return () => { operacao.current += 1; consulta.current?.abort(); };
+    return () => consulta.current?.abort();
   }, [restaurarSessao]);
 
   useEffect(() => {
-    if (!sessao.token) return;
-    const validade = expiracaoToken(sessao.token);
-    if (validade === null) return;
-    let temporizador;
-    function conferirValidade() {
-      const restante = validade - Date.now();
-      if (restante <= 0) logout();
-      else temporizador = setTimeout(conferirValidade, Math.min(restante, 2147483647));
-    }
-    conferirValidade();
+    if (!sessao.expiraEm) return;
+    const tempoRestante = Math.max(0, sessao.expiraEm - Date.now());
+    const temporizador = setTimeout(logout, tempoRestante);
     return () => clearTimeout(temporizador);
-  }, [sessao.token, logout]);
+  }, [sessao.expiraEm, logout]);
 
   async function login(dados, { signal } = {}) {
-    const atual = ++operacao.current;
     consulta.current?.abort();
-    const token = await entrar(dados, { signal });
-    if (signal?.aborted || atual !== operacao.current) throw new DOMException('Acesso cancelado.', 'AbortError');
-    const validade = expiracaoToken(token);
-    if (validade !== null && validade <= Date.now()) throw new Error('Seu acesso expirou. Entre novamente.');
-    salvarToken(token);
+    const controlador = new AbortController();
+    consulta.current = controlador;
+    const sinal = signal
+      ? AbortSignal.any([signal, controlador.signal])
+      : controlador.signal;
+    let token;
+
     try {
-      const usuario = await consultarUsuario({ signal });
-      if (signal?.aborted || atual !== operacao.current || token !== lerToken()) {
-        throw new DOMException('Acesso cancelado.', 'AbortError');
-      }
-      setSessao({ status: 'autenticada', usuario, token, erro: '' });
+      token = await entrar(dados, { signal: sinal });
+      sinal.throwIfAborted();
+      salvarToken(token);
+      const { expiraEm, ...usuario } = await consultarUsuario({ signal: sinal });
+      sinal.throwIfAborted();
+      setSessao({ status: 'autenticada', usuario, expiraEm, erro: '' });
       return usuario;
     } catch (erro) {
-      if (atual === operacao.current && token === lerToken()) {
+      if (token && token === lerToken()) {
         limparToken();
         setSessao(sessaoAnonima);
       }
@@ -82,11 +92,21 @@ export function AuthProvider({ children }) {
     }
   }
 
-  return <AuthContext.Provider value={{ ...sessao, login, logout, cadastrar: cadastrarUsuario, restaurarSessao }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        ...sessao,
+        login,
+        logout,
+        cadastrar: cadastrarUsuario,
+        restaurarSessao,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-  const contexto = useContext(AuthContext);
-  if (!contexto) throw new Error('useAuth precisa estar dentro de AuthProvider.');
-  return contexto;
+  return useContext(AuthContext);
 }

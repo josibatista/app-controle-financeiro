@@ -13,7 +13,12 @@ export const itensMenu = [
   { caminho: '/saude-financeira', rotulo: 'Saúde financeira', icone: 'saude' },
 ];
 
-export default function MenuLateral({ minimizado = false, aoAlternar, aoNavegar, focoInicial = false }) {
+export default function MenuLateral({
+  minimizado = false,
+  aoAlternar,
+  aoNavegar,
+  focoInicial = false,
+}) {
   const menuId = useId();
   const { logout } = useAuth();
   const navegar = useNavigate();
@@ -32,9 +37,13 @@ export default function MenuLateral({ minimizado = false, aoAlternar, aoNavegar,
         aria-label={rotulo}
         title={minimizado ? rotulo : undefined}
         onClick={aoNavegar}
-        className={({ isActive }) => `fl-menu-item ${classe}${isActive ? ' fl-menu-item--ativo' : ''}`}
+        className={({ isActive }) =>
+          `fl-menu-item ${classe}${isActive ? ' fl-menu-item--ativo' : ''}`
+        }
       >
-        <span className="fl-menu-icone"><Icone nome={icone} /></span>
+        <span className="fl-menu-icone">
+          <Icone nome={icone} />
+        </span>
         <span className="fl-menu-rotulo">{rotulo}</span>
       </NavLink>
     );
@@ -43,7 +52,16 @@ export default function MenuLateral({ minimizado = false, aoAlternar, aoNavegar,
   return (
     <div className={`fl-menu-lateral${minimizado ? ' fl-menu-lateral--minimizado' : ''}`}>
       <div className="fl-menu-topo">
-        <button className="fl-menu-alternar" type="button" aria-label={nomeBotao} title={nomeBotao} aria-controls={menuId} aria-expanded={!minimizado} onClick={aoAlternar} autoFocus={focoInicial}>
+        <button
+          className="fl-menu-alternar"
+          type="button"
+          aria-label={nomeBotao}
+          title={nomeBotao}
+          aria-controls={menuId}
+          aria-expanded={!minimizado}
+          onClick={aoAlternar}
+          autoFocus={focoInicial}
+        >
           <Icone nome={minimizado ? 'painelExpandir' : 'painelRecolher'} />
           <span className="fl-menu-rotulo">{nomeBotao}</span>
         </button>
@@ -58,8 +76,16 @@ export default function MenuLateral({ minimizado = false, aoAlternar, aoNavegar,
         </div>
       </nav>
       <div className="fl-menu-rodape">
-        <button className="fl-menu-item fl-menu-sair" type="button" aria-label="Sair da conta" title={minimizado ? 'Sair da conta' : undefined} onClick={sair}>
-          <span className="fl-menu-icone"><Icone nome="sair" /></span>
+        <button
+          className="fl-menu-item fl-menu-sair"
+          type="button"
+          aria-label="Sair da conta"
+          title={minimizado ? 'Sair da conta' : undefined}
+          onClick={sair}
+        >
+          <span className="fl-menu-icone">
+            <Icone nome="sair" />
+          </span>
           <span className="fl-menu-rotulo">Sair da conta</span>
         </button>
       </div>
