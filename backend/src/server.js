@@ -1,6 +1,4 @@
 import 'dotenv/config';
-import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import router from './routes/route.js';
@@ -35,13 +33,13 @@ export function criarApp(seguranca = carregarSeguranca()) {
   app.use('/api/auth', criarAuthRouter(seguranca));
   app.use('/api', router);
   app.use((req, res) => {
-    res.status(404).json({ erro: 'Rota não encontrada.' });
+    res.status(404).json({ mensagem: 'Rota não encontrada.' });
   });
   app.use(tratarErro);
   return app;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (process.env.NODE_ENV !== 'test') {
   const porta = Number(process.env.PORT || 3000);
   criarApp().listen(porta, '127.0.0.1', () => {
     console.log(`API disponível em http://127.0.0.1:${porta}`);

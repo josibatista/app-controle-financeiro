@@ -3,11 +3,11 @@ import {
   listarPorCategoria,
   listarPorFonteDestino
 } from '../models/relatorio.js';
-import { identificarUsuarioDev } from '../middlewares/identificarUsuarioDev.js';
+import { autenticar } from '../middlewares/autenticar.js';
 
 const router = Router();
 
-router.use(identificarUsuarioDev);
+router.use(autenticar);
 
 function validarPeriodo(inicio, fim) {
   const formatoData = /^\d{4}-\d{2}-\d{2}$/;
@@ -41,7 +41,7 @@ router.get('/categorias', async (req, res) => {
     //verifica se o período foi informado corretamente.
     if (!validarPeriodo(inicio, fim)) {
       return res.status(400).json({
-        erro: 'Informe um período válido com data inicial e final.'
+        mensagem: 'Informe um período válido com data inicial e final.'
       });
     }
 
@@ -57,7 +57,7 @@ router.get('/categorias', async (req, res) => {
     console.error('Erro ao consultar relatório por categoria:', erro);
 
     return res.status(500).json({
-      erro: 'Não foi possível consultar o relatório por categoria.'
+      mensagem: 'Não foi possível consultar o relatório por categoria.'
     });
   }
 });
@@ -70,7 +70,7 @@ router.get('/fontes-destinos', async (req, res) => {
     //verifica se o período foi informado corretamente.
     if (!validarPeriodo(inicio, fim)) {
       return res.status(400).json({
-        erro: 'Informe um período válido com data inicial e final.'
+        mensagem: 'Informe um período válido com data inicial e final.'
       });
     }
 
@@ -86,7 +86,7 @@ router.get('/fontes-destinos', async (req, res) => {
     console.error('Erro ao consultar relatório por fontes e destinos:', erro);
 
     return res.status(500).json({
-      erro: 'Não foi possível consultar o relatório por fontes e destinos.'
+      mensagem: 'Não foi possível consultar o relatório por fontes e destinos.'
     });
   }
 });

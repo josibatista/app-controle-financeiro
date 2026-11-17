@@ -23,13 +23,13 @@ export function criarAuthRouter(seguranca) {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     skipSuccessfulRequests: true,
-    message: { erro: 'Muitas tentativas. Aguarde 15 minutos para tentar novamente.' },
+    message: { mensagem: 'Muitas tentativas. Aguarde 15 minutos para tentar novamente.' },
   });
 
   router.post('/cadastro', async (req, res) => {
-    const { dados, campos } = validarCadastro(req.body);
-    if (Object.keys(campos).length) {
-      return res.status(400).json({ erro: 'Confira os campos informados.', campos });
+    const { dados, erros } = validarCadastro(req.body);
+    if (Object.keys(erros).length) {
+      return res.status(400).json({ mensagem: 'Confira os campos informados.', erros });
     }
 
     const senhaHash = await bcrypt.hash(dados.senha, 10);
@@ -50,9 +50,9 @@ export function criarAuthRouter(seguranca) {
   });
 
   router.post('/login', limitarLogin, async (req, res) => {
-    const { dados, campos } = validarLogin(req.body);
-    if (Object.keys(campos).length) {
-      return res.status(400).json({ erro: 'Confira os campos informados.', campos });
+    const { dados, erros } = validarLogin(req.body);
+    if (Object.keys(erros).length) {
+      return res.status(400).json({ mensagem: 'Confira os campos informados.', erros });
     }
 
     const usuario = await Usuario.buscarPorEmail(dados.email);
@@ -61,7 +61,7 @@ export function criarAuthRouter(seguranca) {
       usuario?.senha_hash || hashComparacao,
     );
     if (!usuario || !senhaCorreta) {
-      return res.status(401).json({ erro: 'E-mail ou senha inválidos.' });
+      return res.status(401).json({ mensagem: 'E-mail ou senha inválidos.' });
     }
 
     const token = jwt.sign({}, seguranca.jwtSecret, {
@@ -77,7 +77,7 @@ export function criarAuthRouter(seguranca) {
   router.get('/me', autenticar, async (req, res) => {
     const usuario = await Usuario.buscarPorId(req.usuarioId);
     if (!usuario) {
-      return res.status(401).json({ erro: 'Sessão inválida. Entre novamente.' });
+      return res.status(401).json({ mensagem: 'Sessão inválida. Entre novamente.' });
     }
     return res.json({
       ...dadosPublicos(usuario),

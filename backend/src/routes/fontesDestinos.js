@@ -1,13 +1,11 @@
 import { Router } from 'express';
 import { pool } from '../config/db.js';
 import * as FonteDestino from '../models/fonteDestino.js';
-import {
-  identificarUsuarioDev,
-} from '../middlewares/identificarUsuarioDev.js';
+import { autenticar } from '../middlewares/autenticar.js';
 
 const router = Router();
 
-router.use(identificarUsuarioDev);
+router.use(autenticar);
 
 function erroHttp(status, mensagem) {
   return Object.assign(new Error(mensagem), { status });
@@ -200,7 +198,7 @@ router.use((erro, req, res, next) => {
     });
   }
 
-  if (erro.code === '23503') {
+  if (erro.code === '23503' && req.method === 'DELETE') {
     return res.status(409).json({
       mensagem:
         'Este registro possui lançamentos vinculados e não pode ser excluído.',

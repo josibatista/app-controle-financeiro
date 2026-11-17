@@ -8,6 +8,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { validarCadastro, cpfValido } from '../src/models/validarUsuario.js';
 
+process.env.NODE_ENV = 'test';
+
 function gerarCpf() {
   const digitos = Array.from(randomBytes(9), (numero) => numero % 10);
   for (const tamanho of [9, 10]) {
@@ -32,19 +34,19 @@ function cadastro(alteracoes = {}) {
 }
 
 test('valida os cinco campos, CPF e senha antes de consultar o banco', () => {
-  assert.equal(Object.keys(validarCadastro({}).campos).length, 5);
+  assert.equal(Object.keys(validarCadastro({}).erros).length, 5);
   const dados = cadastro();
   assert.ok(cpfValido(dados.cpf));
-  assert.deepEqual(validarCadastro(dados).campos, {});
+  assert.deepEqual(validarCadastro(dados).erros, {});
   for (const cpf of ['0'.repeat(11), dados.cpf.slice(0, 10), `${dados.cpf}abc`]) {
-    assert.ok(validarCadastro({ ...dados, cpf }).campos.cpf);
+    assert.ok(validarCadastro({ ...dados, cpf }).erros.cpf);
   }
-  assert.ok(validarCadastro({ ...dados, email: 'sem-arroba' }).campos.email);
-  assert.ok(validarCadastro({ ...dados, nome: {} }).campos.nome);
-  assert.ok(validarCadastro({ ...dados, senha: 'apenasletras' }).campos.senha);
-  assert.ok(validarCadastro({ ...dados, senha: 'A1'.repeat(40) }).campos.senha);
+  assert.ok(validarCadastro({ ...dados, email: 'sem-arroba' }).erros.email);
+  assert.ok(validarCadastro({ ...dados, nome: {} }).erros.nome);
+  assert.ok(validarCadastro({ ...dados, senha: 'apenasletras' }).erros.senha);
+  assert.ok(validarCadastro({ ...dados, senha: 'A1'.repeat(40) }).erros.senha);
   assert.ok(
-    validarCadastro({ ...dados, confirmacaoSenha: 'Diferente123' }).campos
+    validarCadastro({ ...dados, confirmacaoSenha: 'Diferente123' }).erros
       .confirmacaoSenha,
   );
 });
@@ -96,6 +98,12 @@ test(
         });
         const dados = resposta.status === 204 ? null : await resposta.json();
         assert.ok(!JSON.stringify(dados).includes('senha_hash'));
+        if (resposta.status >= 400) {
+          assert.equal(typeof dados.mensagem, 'string');
+          assert.ok(
+            Object.keys(dados).every((chave) => ['mensagem', 'erros'].includes(chave)),
+          );
+        }
         return { status: resposta.status, dados, headers: resposta.headers };
       }
 
@@ -145,7 +153,7 @@ test(
             body: dados,
           });
           assert.equal(resposta.status, 409);
-          assert.deepEqual(Object.keys(resposta.dados.campos), [campo]);
+          assert.deepEqual(Object.keys(resposta.dados.erros), [campo]);
         }
         assert.equal(
           Number((await pool.query('SELECT count(*) FROM usuarios')).rows[0].count),
@@ -181,7 +189,7 @@ test(
       await t.test('validacoes sao realizadas no servidor', async () => {
         const resposta = await chamar('/auth/cadastro', { method: 'POST', body: {} });
         assert.equal(resposta.status, 400);
-        assert.equal(Object.keys(resposta.dados.campos).length, 5);
+        assert.equal(Object.keys(resposta.dados.erros).length, 5);
       });
 
       await t.test('login usa mensagem generica e emite JWT com expiracao', async () => {
@@ -286,6 +294,97 @@ test(
             assert.equal(relatorio.status, 200);
             assert.ok(!JSON.stringify(relatorio.dados).includes('123.45'));
           }
+        },
+      );
+
+      await t.test('rotas usam o mesmo formato de erro', async () => {
+        for (const caminho of ['/categorias', '/fontes-destinos', '/lancamentos']) {
+          const resposta = await chamar(caminho, { method: 'POST', token, body: {} });
+          assert.equal(resposta.status, 400);
+          assert.ok(Object.keys(resposta.dados.erros).length > 0);
+        }
+        assert.equal(
+          (await chamar('/relatorios/categorias?inicio=invalido', { token })).status,
+          400,
+        );
+        assert.equal((await chamar('/rota-inexistente', { token })).status, 404);
+        const duplicada = await chamar('/categorias', {
+          token,
+          method: 'POST',
+          body: { nome: 'Salário', tipo: 'entrada' },
+        });
+        assert.equal(duplicada.status, 409);
+
+        for (const [body, status] of [
+          ['{', 400],
+          [JSON.stringify({ nome: 'a'.repeat(17000) }), 413],
+        ]) {
+          const resposta = await fetch(base + '/auth/cadastro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+          });
+          assert.equal(resposta.status, status);
+          assert.equal(typeof (await resposta.json()).mensagem, 'string');
+        }
+      });
+
+      await t.test(
+        'cliente do frontend recebe mensagem e erros do cadastro',
+        async () => {
+          const fetchOriginal = globalThis.fetch;
+          const storageOriginal = globalThis.sessionStorage;
+          const armazenamento = new Map();
+          globalThis.sessionStorage = {
+            getItem: (chave) => armazenamento.get(chave) ?? null,
+            setItem: (chave, valor) => armazenamento.set(chave, valor),
+            removeItem: (chave) => armazenamento.delete(chave),
+          };
+          globalThis.fetch = (url, opcoes) => fetchOriginal(new URL(url, base), opcoes);
+          try {
+            const { api, salvarToken, lerToken } =
+              await import('../../frontend/src/services/api.js');
+            await assert.rejects(
+              api('/auth/cadastro', {
+                method: 'POST',
+                publica: true,
+                body: cadastro({ email: pessoa.email }),
+              }),
+              (erro) => erro.status === 409 && typeof erro.erros.email === 'string',
+            );
+            salvarToken(token);
+            assert.equal((await api('/auth/me')).id, usuario.id);
+            salvarToken('token-invalido');
+            await assert.rejects(api('/auth/me'), (erro) => erro.status === 401);
+            assert.equal(lerToken(), null);
+          } finally {
+            globalThis.fetch = fetchOriginal;
+            if (storageOriginal === undefined) delete globalThis.sessionStorage;
+            else globalThis.sessionStorage = storageOriginal;
+          }
+        },
+      );
+
+      await t.test(
+        'chave estrangeira inexistente difere de exclusao com vinculo',
+        async () => {
+          const fontes = (await chamar('/fontes-destinos', { token })).dados;
+          const vinculada = await chamar(`/fontes-destinos/${fontes[0].id}`, {
+            token,
+            method: 'DELETE',
+          });
+          assert.equal(vinculada.status, 409);
+          assert.match(vinculada.dados.mensagem, /excluído/);
+
+          await pool.query('DELETE FROM usuarios WHERE id = $1', [segundo.id]);
+          const inexistente = await chamar('/fontes-destinos', {
+            token: tokenSegundo,
+            method: 'POST',
+            body: { nome: 'Conta de teste', tipo: 'conta' },
+          });
+          assert.equal(inexistente.status, 400);
+          assert.match(inexistente.dados.mensagem, /relacionados não existe/);
+          assert.ok(!inexistente.dados.mensagem.includes('excluído'));
         },
       );
 

@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { pool } from '../config/db.js';
 import * as Categoria from '../models/categoria.js';
-import { identificarUsuarioDev } from '../middlewares/identificarUsuarioDev.js';
+import { autenticar } from '../middlewares/autenticar.js';
 
 const router = Router();
 
-router.use(identificarUsuarioDev);
+router.use(autenticar);
 
 function erroHttp(status, mensagem) {
   return Object.assign(new Error(mensagem), { status });

@@ -25,55 +25,55 @@ export function validarCadastro(body = {}) {
     senha: texto(body?.senha),
     confirmacaoSenha: texto(body?.confirmacaoSenha),
   };
-  const campos = {};
+  const erros = {};
 
-  if (!dados.nome) campos.nome = 'Informe seu nome.';
+  if (!dados.nome) erros.nome = 'Informe seu nome.';
   else if (dados.nome.length > 120 || /[\u0000-\u001f\u007f]/.test(dados.nome)) {
-    campos.nome = 'Use um nome de até 120 caracteres, sem caracteres de controle.';
+    erros.nome = 'Use um nome de até 120 caracteres, sem caracteres de controle.';
   }
 
-  if (!dados.email) campos.email = 'Informe seu e-mail.';
+  if (!dados.email) erros.email = 'Informe seu e-mail.';
   else if (dados.email.length > 160 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email)) {
-    campos.email = 'Digite um e-mail válido.';
+    erros.email = 'Digite um e-mail válido.';
   }
 
   const formatoCpf = /^(\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2})$/;
-  if (!dados.cpf) campos.cpf = 'Informe seu CPF.';
+  if (!dados.cpf) erros.cpf = 'Informe seu CPF.';
   else if (!formatoCpf.test(dados.cpf) || !cpfValido(dados.cpf.replace(/\D/g, ''))) {
-    campos.cpf = 'Digite um CPF válido.';
+    erros.cpf = 'Digite um CPF válido.';
   }
   dados.cpf = dados.cpf.replace(/\D/g, '');
 
-  if (!dados.senha.trim()) campos.senha = 'Informe sua senha.';
+  if (!dados.senha.trim()) erros.senha = 'Informe sua senha.';
   else if (
     dados.senha.length < 8 ||
     !/[a-zA-Z]/.test(dados.senha) ||
     !/\d/.test(dados.senha)
   ) {
-    campos.senha = 'Use no mínimo 8 caracteres, com letras e números.';
+    erros.senha = 'Use no mínimo 8 caracteres, com letras e números.';
   } else if (Buffer.byteLength(dados.senha, 'utf8') > 72) {
-    campos.senha = 'Use uma senha de até 72 bytes.';
+    erros.senha = 'Use uma senha de até 72 bytes.';
   }
 
-  if (!dados.confirmacaoSenha.trim()) campos.confirmacaoSenha = 'Confirme sua senha.';
+  if (!dados.confirmacaoSenha.trim()) erros.confirmacaoSenha = 'Confirme sua senha.';
   else if (dados.confirmacaoSenha !== dados.senha) {
-    campos.confirmacaoSenha = 'As senhas precisam ser iguais.';
+    erros.confirmacaoSenha = 'As senhas precisam ser iguais.';
   }
 
-  return { dados, campos };
+  return { dados, erros };
 }
 
 export function validarLogin(body = {}) {
   const email = texto(body?.email).trim().toLowerCase();
   const senha = texto(body?.senha);
-  const campos = {};
+  const erros = {};
 
   if (!email || email.length > 160 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    campos.email = 'Digite um e-mail válido.';
+    erros.email = 'Digite um e-mail válido.';
   }
-  if (!senha.trim()) campos.senha = 'Informe sua senha.';
+  if (!senha.trim()) erros.senha = 'Informe sua senha.';
   else if (Buffer.byteLength(senha, 'utf8') > 72)
-    campos.senha = 'Use uma senha de até 72 bytes.';
+    erros.senha = 'Use uma senha de até 72 bytes.';
 
-  return { dados: { email, senha }, campos };
+  return { dados: { email, senha }, erros };
 }

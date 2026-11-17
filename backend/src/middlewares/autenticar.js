@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 export function autenticar(req, res, next) {
   const token = req.get('Authorization')?.match(/^Bearer ([^\s]+)$/i)?.[1];
   if (!token) {
-    return res.status(401).json({ erro: 'Entre na sua conta para continuar.' });
+    return res.status(401).json({ mensagem: 'Entre na sua conta para continuar.' });
   }
 
   try {
@@ -26,6 +26,6 @@ export function autenticar(req, res, next) {
   } catch {
     return res
       .status(401)
-      .json({ erro: 'Sessão inválida ou expirada. Entre novamente.' });
+      .json({ mensagem: 'Sessão inválida ou expirada. Entre novamente.' });
   }
 }

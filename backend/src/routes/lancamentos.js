@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import * as Lancamento from '../models/lancamento.js';
-import { identificarUsuarioDev } from '../middlewares/identificarUsuarioDev.js';
+import { autenticar } from '../middlewares/autenticar.js';
 
 const router = Router();
 
-router.use(identificarUsuarioDev);
+router.use(autenticar);
 
 function erroHttp(status, mensagem) {
   return Object.assign(new Error(mensagem), { status });
