@@ -4,6 +4,7 @@ import Cadastro from './components/pages/Cadastro.jsx';
 import Lancamentos from './components/pages/Lancamentos.jsx';
 import Categorias from './components/pages/Categorias.jsx';
 import FontesDestinos from './components/pages/FontesDestinos.jsx';
+import Faturas from './components/pages/Faturas.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/lancamentos" element={<Lancamentos />} />
         <Route path="/categorias" element={<Categorias />} />
         <Route path="/fontes-destinos" element={<FontesDestinos />} />
+        <Route path="/faturas" element={<Faturas />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </ThemeProvider>
