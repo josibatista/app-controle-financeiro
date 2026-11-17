@@ -39,6 +39,10 @@
 :root .fl-perfil .fl-perfil-botao--principal { border-color: transparent; background: var(--fl-accent); color: var(--fl-accent-ink); }
 .fl-perfil-botao:hover { filter: brightness(.96); }
 :root .fl-perfil-status { margin-top: 13px; color: var(--fl-secondary); font-size: 12px; }
+:root .fl-perfil-aviso { margin-top: 20px; color: var(--fl-secondary); font-size: 13px; }
+.fl-perfil fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+:root .fl-perfil .fl-perfil-botao:disabled { opacity: .55; cursor: not-allowed; }
+:root .fl-perfil fieldset:disabled .fl-eye { cursor: not-allowed; opacity: .55; }
 
 @media (max-width: 880px) {
   .fl-perfil-secao { grid-template-columns: minmax(0, 1fr); gap: 20px; margin-top: 25px; padding-top: 24px; padding-bottom: 26px; }
