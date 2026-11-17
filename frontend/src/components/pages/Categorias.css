@@ -1,7 +1,7 @@
 :root .cat-main {
-  width: min(100%, 1050px);
-  margin: auto;
-  padding: 36px 28px 56px;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
 }
 
 :root .cat-topo,

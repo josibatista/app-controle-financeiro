@@ -1,7 +1,7 @@
 :root .fd-main {
   width: min(100%, 1200px);
   margin: auto;
-  padding: 36px 28px 56px;
+  padding: 0px;
 }
 
 :root .fd-busca {
