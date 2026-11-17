@@ -6,7 +6,12 @@ import test from 'node:test';
 import pg from 'pg';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { validarCadastro, cpfValido } from '../src/models/validarUsuario.js';
+import {
+  validarCadastro,
+  validarPerfil,
+  validarTrocaSenha,
+  cpfValido,
+} from '../src/models/validarUsuario.js';
 
 process.env.NODE_ENV = 'test';
 
@@ -48,6 +53,31 @@ test('valida os cinco campos, CPF e senha antes de consultar o banco', () => {
   assert.ok(
     validarCadastro({ ...dados, confirmacaoSenha: 'Diferente123' }).erros
       .confirmacaoSenha,
+  );
+});
+
+test('perfil e troca de senha seguem as regras do cadastro', () => {
+  assert.deepEqual(validarPerfil({ nome: 'Pessoa', email: 'A@B.COM' }).dados, {
+    nome: 'Pessoa',
+    email: 'a@b.com',
+  });
+  assert.deepEqual(Object.keys(validarPerfil({}).erros), ['nome', 'email']);
+  assert.ok(validarPerfil({ nome: 'Pessoa', email: 'sem-arroba' }).erros.email);
+  assert.equal(
+    validarPerfil({ nome: 'Pessoa', email: 'a@b.com', cpf: '1' }).dados.cpf,
+    undefined,
+  );
+
+  const senhas = {
+    senhaAtual: 'Atual1234',
+    novaSenha: 'Nova12345',
+    confirmacaoSenha: 'Nova12345',
+  };
+  assert.deepEqual(validarTrocaSenha(senhas).erros, {});
+  assert.equal(Object.keys(validarTrocaSenha({}).erros).length, 3);
+  assert.ok(validarTrocaSenha({ ...senhas, novaSenha: 'apenasletras' }).erros.novaSenha);
+  assert.ok(
+    validarTrocaSenha({ ...senhas, confirmacaoSenha: 'Outra1234' }).erros.confirmacaoSenha,
   );
 });
 

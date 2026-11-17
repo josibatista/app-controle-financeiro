@@ -173,19 +173,22 @@ O cadastro grava o usuário, as categorias padrão e a conta corrente na mesma t
 
 O token JWT dura uma hora. As rotas privadas validam esse token e usam `req.usuarioId` para consultar os dados da conta. O navegador guarda o token em `sessionStorage` e o remove ao sair. O login limita as tentativas malsucedidas a dez por IP em quinze minutos.
 
-O dashboard consulta o resumo do mês no backend. O perfil mostra os dados da sessão; a edição dos dados e da senha ainda está desabilitada.
+O dashboard consulta o resumo do mês no backend. No perfil, o usuário altera nome, e-mail e senha com as mesmas regras do cadastro; o CPF aparece apenas para consulta. Para trocar a senha, é preciso informar a senha atual.
 
 O grupo fará o desafio de saúde financeira em uma etapa posterior. Por enquanto, o menu e a rota `/saude-financeira` indicam **Em breve**; ainda não há cálculo nem API desse desafio.
 
 ## Rotas da API
 
-As três rotas de autenticação ficam em `/api/auth`. Cadastro e login são públicos. Todas as demais rotas da tabela exigem `Authorization: Bearer <token>`.
+As rotas de autenticação e perfil ficam em `/api/auth`. Cadastro e login são públicos. Todas as demais rotas da tabela exigem `Authorization: Bearer <token>`.
 
 | Método | Rota | Função |
 |---|---|---|
 | POST | `/api/auth/cadastro` | Criar usuário com os dados padrão. |
 | POST | `/api/auth/login` | Autenticar e devolver o token. |
 | GET | `/api/auth/me` | Consultar os dados básicos do usuário e a expiração da sessão. |
+| GET | `/api/auth/perfil` | Consultar nome, e-mail e CPF do usuário. |
+| PUT | `/api/auth/perfil` | Atualizar nome e e-mail. |
+| PUT | `/api/auth/senha` | Alterar a senha, informando a senha atual. |
 | GET | `/api/categorias` | Listar categorias da conta. |
 | POST | `/api/categorias` | Criar categoria. |
 | PUT | `/api/categorias/:id` | Atualizar categoria. |

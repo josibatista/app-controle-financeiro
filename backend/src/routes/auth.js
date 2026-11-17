@@ -7,7 +7,13 @@ import { pool } from '../config/db.js';
 import * as Usuario from '../models/usuario.js';
 import * as Categoria from '../models/categoria.js';
 import * as FonteDestino from '../models/fonteDestino.js';
-import { validarCadastro, validarLogin } from '../models/validarUsuario.js';
+import * as Perfil from '../models/perfil.js';
+import {
+  validarCadastro,
+  validarLogin,
+  validarPerfil,
+  validarTrocaSenha,
+} from '../models/validarUsuario.js';
 import { autenticar } from '../middlewares/autenticar.js';
 
 function dadosPublicos(usuario) {
@@ -83,6 +89,48 @@ export function criarAuthRouter(seguranca) {
       ...dadosPublicos(usuario),
       expiraEm: req.expiracaoToken * 1000,
     });
+  });
+
+  router.get('/perfil', autenticar, async (req, res) => {
+    const usuario = await Perfil.buscar(req.usuarioId);
+    if (!usuario) {
+      return res.status(401).json({ mensagem: 'Sessão inválida. Entre novamente.' });
+    }
+    return res.json(usuario);
+  });
+
+  router.put('/perfil', autenticar, async (req, res) => {
+    const { dados, erros } = validarPerfil(req.body);
+    if (Object.keys(erros).length) {
+      return res.status(400).json({ mensagem: 'Confira os campos informados.', erros });
+    }
+
+    const usuario = await Perfil.atualizarDados(req.usuarioId, dados);
+    if (!usuario) {
+      return res.status(401).json({ mensagem: 'Sessão inválida. Entre novamente.' });
+    }
+    return res.json(usuario);
+  });
+
+  router.put('/senha', autenticar, limitarLogin, async (req, res) => {
+    const { dados, erros } = validarTrocaSenha(req.body);
+    if (Object.keys(erros).length) {
+      return res.status(400).json({ mensagem: 'Confira os campos informados.', erros });
+    }
+
+    const senhaHash = await Perfil.buscarSenhaHash(req.usuarioId);
+    if (!senhaHash) {
+      return res.status(401).json({ mensagem: 'Sessão inválida. Entre novamente.' });
+    }
+    if (!(await bcrypt.compare(dados.senhaAtual, senhaHash))) {
+      return res.status(400).json({
+        mensagem: 'Confira os campos informados.',
+        erros: { senhaAtual: 'Senha atual incorreta.' },
+      });
+    }
+
+    await Perfil.atualizarSenha(req.usuarioId, await bcrypt.hash(dados.novaSenha, 10));
+    return res.status(204).end();
   });
 
   return router;

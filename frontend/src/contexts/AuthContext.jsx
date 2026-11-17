@@ -92,6 +92,10 @@ export function AuthProvider({ children }) {
     }
   }
 
+  function atualizarUsuario({ id, nome, email }) {
+    setSessao((atual) => ({ ...atual, usuario: { id, nome, email } }));
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -100,6 +104,7 @@ export function AuthProvider({ children }) {
         logout,
         cadastrar: cadastrarUsuario,
         restaurarSessao,
+        atualizarUsuario,
       }}
     >
       {children}

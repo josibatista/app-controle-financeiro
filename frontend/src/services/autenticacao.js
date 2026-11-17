@@ -37,3 +37,28 @@ export async function consultarUsuario({ signal } = {}) {
     expiraEm: dados.expiraEm,
   };
 }
+
+export function consultarPerfil({ signal } = {}) {
+  return api('/auth/perfil', { signal });
+}
+
+export function atualizarPerfil(dados) {
+  return api('/auth/perfil', {
+    method: 'PUT',
+    body: {
+      nome: dados.nome.trim(),
+      email: dados.email.trim().toLowerCase(),
+    },
+  });
+}
+
+export function alterarSenha(dados) {
+  return api('/auth/senha', {
+    method: 'PUT',
+    body: {
+      senhaAtual: dados.senhaAtual,
+      novaSenha: dados.novaSenha,
+      confirmacaoSenha: dados.confirmacaoSenha,
+    },
+  });
+}
