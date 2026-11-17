@@ -3,6 +3,8 @@ import { Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
 import Login from './components/pages/Login.jsx';
 import Cadastro from './components/pages/Cadastro.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import { AuthProvider } from './contexts/AuthContext.jsx';
+import RotaProtegida from './components/RotaProtegida.jsx';
 import LayoutPrincipal from './components/LayoutPrincipal.jsx';
 import { itensMenu } from './components/MenuLateral.jsx';
 import Inicio from './components/pages/Inicio.jsx';
@@ -19,19 +21,23 @@ function AreaReservada({ titulo }) {
 export default function App() {
   return (
     <ThemeProvider>
+      <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        <Route element={<LayoutPrincipal />}>
+        <Route element={<RotaProtegida />}>
+          <Route element={<LayoutPrincipal />}>
           <Route path="/inicio" element={<Inicio />} />
           <Route path="/meu-perfil" element={<Perfil />} />
           {itensMenu.map(({ caminho, rotulo }) => (
             <Route key={caminho} path={caminho} element={<AreaReservada titulo={rotulo} />} />
           ))}
+          </Route>
         </Route>
         <Route path="/" element={<Navigate to="/inicio" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

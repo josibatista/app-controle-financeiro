@@ -1,5 +1,6 @@
 import { useId } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import Icone from './Icone.jsx';
 import './MenuLateral.css';
 
@@ -14,7 +15,14 @@ export const itensMenu = [
 
 export default function MenuLateral({ minimizado = false, aoAlternar, aoNavegar, focoInicial = false }) {
   const menuId = useId();
+  const { logout } = useAuth();
+  const navegar = useNavigate();
   const nomeBotao = minimizado ? 'Fixar menu' : 'Minimizar menu';
+  function sair() {
+    logout();
+    aoNavegar?.();
+    navegar('/login', { replace: true });
+  }
   function item(caminho, rotulo, icone, classe = '') {
     return (
       <NavLink
@@ -50,7 +58,10 @@ export default function MenuLateral({ minimizado = false, aoAlternar, aoNavegar,
         </div>
       </nav>
       <div className="fl-menu-rodape">
-        {item('/login', 'Sair da conta', 'sair')}
+        <button className="fl-menu-item fl-menu-sair" type="button" aria-label="Sair da conta" title={minimizado ? 'Sair da conta' : undefined} onClick={sair}>
+          <span className="fl-menu-icone"><Icone nome="sair" /></span>
+          <span className="fl-menu-rotulo">Sair da conta</span>
+        </button>
       </div>
     </div>
   );
