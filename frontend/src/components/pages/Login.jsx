@@ -68,7 +68,7 @@ export default function Login() {
         );
       else {
         const campos = Object.fromEntries(
-          Object.entries(erro.campos ?? {}).filter(([campo]) =>
+          Object.entries(erro.erros ?? {}).filter(([campo]) =>
             ['email', 'senha'].includes(campo),
           ),
         );

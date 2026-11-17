@@ -35,6 +35,7 @@ export default function App() {
                 element={
                   <section aria-label="Saúde financeira">
                     <h1>Saúde financeira</h1>
+                    <p>Em breve. O desafio será implementado em uma próxima etapa.</p>
                   </section>
                 }
               />

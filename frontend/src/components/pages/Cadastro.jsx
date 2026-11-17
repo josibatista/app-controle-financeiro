@@ -83,9 +83,7 @@ export default function Cadastro() {
     } catch (erro) {
       if (erro.name === 'AbortError' || controlador.signal.aborted) return;
       const campos = Object.fromEntries(
-        Object.entries(erro.campos ?? {}).filter(([campo]) =>
-          Object.hasOwn(dados, campo),
-        ),
+        Object.entries(erro.erros ?? {}).filter(([campo]) => Object.hasOwn(dados, campo)),
       );
       setErros(campos);
       setMensagem(

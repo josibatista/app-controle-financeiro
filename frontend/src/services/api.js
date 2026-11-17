@@ -32,11 +32,10 @@ export function aoExpirarSessao(ouvinte) {
 }
 
 export class ErroApi extends Error {
-  constructor(mensagem, status = 0, campos = {}) {
+  constructor(mensagem, status = 0, erros = {}) {
     super(mensagem);
     this.status = status;
-    this.campos = campos;
-    this.erros = campos;
+    this.erros = erros;
   }
 }
 
@@ -79,8 +78,8 @@ export async function api(caminho, { publica = false, ...opcoes } = {}) {
     const mensagem =
       resposta.status >= 500
         ? 'Não foi possível concluir a operação. Tente novamente.'
-        : dados.erro || dados.mensagem || 'Não foi possível concluir a operação.';
-    throw new ErroApi(mensagem, resposta.status, dados.campos || dados.erros || {});
+        : dados.mensagem || 'Não foi possível concluir a operação.';
+    throw new ErroApi(mensagem, resposta.status, dados.erros || {});
   }
 
   return dados;

@@ -10,7 +10,12 @@ export const itensMenu = [
   { caminho: '/lancamentos', rotulo: 'Lançamentos', icone: 'lancamentos' },
   { caminho: '/faturas', rotulo: 'Faturas', icone: 'faturas' },
   { caminho: '/relatorios', rotulo: 'Relatórios', icone: 'relatorios' },
-  { caminho: '/saude-financeira', rotulo: 'Saúde financeira', icone: 'saude' },
+  {
+    caminho: '/saude-financeira',
+    rotulo: 'Saúde financeira',
+    icone: 'saude',
+    emBreve: true,
+  },
 ];
 
 export default function MenuLateral({
@@ -28,14 +33,15 @@ export default function MenuLateral({
     aoNavegar?.();
     navegar('/login', { replace: true });
   }
-  function item(caminho, rotulo, icone, classe = '') {
+  function item(caminho, rotulo, icone, classe = '', emBreve = false) {
+    const descricao = emBreve ? `${rotulo} (em breve)` : rotulo;
     return (
       <NavLink
         key={caminho}
         to={caminho}
         end
-        aria-label={rotulo}
-        title={minimizado ? rotulo : undefined}
+        aria-label={descricao}
+        title={minimizado ? descricao : undefined}
         onClick={aoNavegar}
         className={({ isActive }) =>
           `fl-menu-item ${classe}${isActive ? ' fl-menu-item--ativo' : ''}`
@@ -44,7 +50,10 @@ export default function MenuLateral({
         <span className="fl-menu-icone">
           <Icone nome={icone} />
         </span>
-        <span className="fl-menu-rotulo">{rotulo}</span>
+        <span className="fl-menu-rotulo">
+          {rotulo}
+          {emBreve && <small className="fl-menu-em-breve">Em breve</small>}
+        </span>
       </NavLink>
     );
   }
@@ -72,7 +81,9 @@ export default function MenuLateral({
           {item('/inicio', 'Início', 'inicio')}
         </div>
         <div className="fl-menu-secoes">
-          {itensMenu.map(({ caminho, rotulo, icone }) => item(caminho, rotulo, icone))}
+          {itensMenu.map(({ caminho, rotulo, icone, emBreve }) =>
+            item(caminho, rotulo, icone, '', emBreve),
+          )}
         </div>
       </nav>
       <div className="fl-menu-rodape">
