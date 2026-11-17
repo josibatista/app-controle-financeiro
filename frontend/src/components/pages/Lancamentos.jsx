@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import Campo from '../Campo.jsx';
-import SeletorTema from '../SeletorTema.jsx';
 import {
   dataLocal,
   dataValida,
@@ -389,10 +388,6 @@ export default function Lancamentos() {
 
   return (
     <div className="fl-page lc-page">
-      <header className="fl-header">
-        <span className="lc-marca">Controle financeiro</span>
-        <SeletorTema />
-      </header>
 
       <main className="lc-main">
         <div className="lc-cabecalho">

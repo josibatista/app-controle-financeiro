@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Campo from '../Campo.jsx';
-import SeletorTema from '../SeletorTema.jsx';
 import {
   tiposFonteDestino,
   listarFontesDestinos,
@@ -540,10 +539,6 @@ export default function FontesDestinos() {
 
   return (
     <div className="fl-page fd-page">
-      <header className="fl-header">
-        <span>Controle financeiro</span>
-        <SeletorTema />
-      </header>
 
       <main className="fd-main">
         <div className="fd-topo">

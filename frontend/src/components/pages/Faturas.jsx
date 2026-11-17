@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import SeletorTema from '../SeletorTema.jsx';
 import { listarFaturas } from '../../services/faturas.js';
 import {
   formatarData,
@@ -162,10 +161,6 @@ export default function Faturas() {
 
   return (
     <div className="fl-page fat-page">
-      <header className="fl-header">
-        <span>Controle financeiro</span>
-        <SeletorTema />
-      </header>
 
       <main className="fat-main">
         <div className="fat-topo">

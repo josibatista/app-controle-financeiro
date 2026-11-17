@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Campo from '../Campo.jsx';
-import SeletorTema from '../SeletorTema.jsx';
 import {
   listarCategorias,
   criarCategoria,
@@ -301,10 +300,6 @@ export default function Categorias() {
 
   return (
     <div className="fl-page cat-page">
-      <header className="fl-header">
-        <span>Controle financeiro</span>
-        <SeletorTema />
-      </header>
 
       <main className="cat-main">
         <div className="cat-topo">
