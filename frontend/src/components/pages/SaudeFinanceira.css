@@ -1,0 +1,133 @@
+.sf-page .sf-secao {
+  margin-top: 28px;
+}
+
+.sf-page .sf-secao h2 {
+  margin-bottom: 12px;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.sf-page .sf-periodo,
+.sf-page .sf-secundario {
+  color: var(--fl-secondary);
+  font-size: 13px;
+}
+
+.sf-page .sf-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.sf-page .sf-painel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--fl-line);
+  border-top: 3px solid var(--fl-accent);
+  border-radius: 6px;
+  background: var(--fl-field);
+}
+
+.sf-page .sf-painel h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fl-accent);
+}
+
+.sf-page .sf-painel p + p {
+  margin-top: 8px;
+}
+
+.sf-page .sf-painel .fl-field {
+  margin: 14px 0 0;
+}
+
+.sf-page .sf-valor {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-page .sf-valores {
+  margin: 8px 0 0;
+}
+
+.sf-page .sf-valores--projecao {
+  margin: 0;
+}
+
+.sf-page .sf-valores div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--fl-line);
+}
+
+.sf-page .sf-valores div:last-child {
+  border-bottom: 0;
+}
+
+.sf-page .sf-valores dt {
+  color: var(--fl-secondary);
+}
+
+.sf-page .sf-valores dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-page .sf-projecao {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.sf-page .sf-projecao > div + div {
+  padding-inline-start: 16px;
+  border-inline-start: 1px solid var(--fl-line);
+}
+
+.sf-page .sf-projecao dt {
+  color: var(--fl-secondary);
+  font-size: 14px;
+}
+
+.sf-page .sf-projecao dd {
+  margin: 4px 0 0;
+  font-size: clamp(20px, 2.6vw, 32px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.sf-page .sf-projecao-destaque dd {
+  color: var(--fl-accent);
+}
+.sf-page .sf-projecao-texto {
+  margin-top: 32px;
+}
+
+@media (max-width: 900px) {
+  .sf-page .sf-projecao {
+    grid-template-columns: 1fr;
+  }
+
+  .sf-page .sf-projecao > div + div {
+    padding-inline-start: 0;
+    padding-block-start: 12px;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--fl-line);
+  }
+}
+
+@media (max-width: 720px) {
+  .sf-page .sf-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
