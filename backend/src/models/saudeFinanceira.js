@@ -11,6 +11,10 @@ function paraCentavos(valor) {
   return centavos;
 }
 
+function reaisParaCentavos(valor) {
+  return Math.round(valor * 100);
+}
+
 function paraReais(centavos) {
   return centavos / 100;
 }
@@ -184,10 +188,10 @@ export async function calcularComprometimentoCartoes(usuarioId, db = pool) {
 }
 
 export async function calcularParcelasFuturas(usuarioId, db = pool) {
-  const resultado = await db.query(
+  const resultadoTotal = await db.query(
     `SELECT
        COALESCE(SUM(valor), 0) AS total,
-       MAX(data) AS ultima_data
+       MAX(data) AS ultimo_vencimento
      FROM lancamentos
      WHERE usuario_id = $1
        AND tipo = 'saida'
@@ -196,15 +200,45 @@ export async function calcularParcelasFuturas(usuarioId, db = pool) {
     [usuarioId]
   );
 
-  const total = paraCentavos(resultado.rows[0].total);
+  const resultadoMeses = await db.query(
+    `SELECT
+       DATE_TRUNC('month', data)::date AS mes,
+       COALESCE(SUM(valor), 0) AS total
+     FROM lancamentos
+     WHERE usuario_id = $1
+       AND tipo = 'saida'
+       AND total_parcelas > 1
+       AND data > CURRENT_DATE
+       AND data < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '6 months'
+     GROUP BY DATE_TRUNC('month', data)
+     ORDER BY mes`,
+    [usuarioId]
+  );
+
+  const porMes = resultadoMeses.rows.map((item) => {
+    const total = paraCentavos(item.total);
+
+    return {
+      mes: item.mes.toISOString().slice(0, 7),
+      totalCentavos: total,
+    };
+  });
+
+  const totalCentavos = paraCentavos(
+    resultadoTotal.rows[0].total
+  );
+
+  const ultimoVencimento = resultadoTotal.rows[0].ultimo_vencimento
+    ? String(resultadoTotal.rows[0].ultimo_vencimento).slice(0, 7)
+    : null;
 
   return {
-    total: paraReais(total),
-    ultimaData: resultado.rows[0].ultima_data
-        ? resultado.rows[0].ultima_data.toISOString().slice(0, 10)
-        : null,
-    };
+    totalCentavos,
+    ultimoVencimento,
+    porMes,
+  };
 }
+
 
 export async function calcularProjecaoAnual(usuarioId, db = pool) {
   const resultado = await db.query(
@@ -274,11 +308,13 @@ export function gerarDicasFinanceiras({
     });
   }
 
-  if (parcelasFuturas.total > 0) {
+  if (parcelasFuturas.totalCentavos > 0) {
     dicas.push({
       tipo: 'informacao',
       titulo: 'Parcelas futuras',
-      mensagem: `Você ainda tem ${formatarMoeda(parcelasFuturas.total)} em parcelas futuras.`,
+      mensagem: `Você ainda tem ${formatarMoeda(
+        paraReais(parcelasFuturas.totalCentavos)
+      )} em parcelas futuras.`,
     });
   }
 
@@ -292,12 +328,22 @@ export async function obterSaudeFinanceira(usuarioId, db = pool) {
     comprometimentoCartoes,
     parcelasFuturas,
     projecaoAnual,
+    referencias,
   ] = await Promise.all([
     calcularTaxaPoupanca(usuarioId, db),
     listarVariacaoCategorias(usuarioId, db),
     calcularComprometimentoCartoes(usuarioId, db),
     calcularParcelasFuturas(usuarioId, db),
     calcularProjecaoAnual(usuarioId, db),
+
+    db.query(
+      `SELECT
+         TO_CHAR(DATE_TRUNC('month', CURRENT_DATE), 'YYYY-MM') AS mes_atual,
+         TO_CHAR(
+           DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '12 months',
+           'YYYY-MM'
+         ) AS inicio_projecao`
+    ),
   ]);
 
   const dicas = gerarDicasFinanceiras({
@@ -307,15 +353,37 @@ export async function obterSaudeFinanceira(usuarioId, db = pool) {
   });
 
   return {
-    dicasMes: {
-      taxaPoupanca,
-      variacaoCategorias,
+    mesReferencia: referencias.rows[0].mes_atual,
+
+    poupanca: {
+      percentual: taxaPoupanca.percentual,
     },
-    proximosMeses: {
-      comprometimentoCartoes,
-      parcelasFuturas,
+
+    categorias: variacaoCategorias.map((categoria) => ({
+      id: categoria.categoriaId,
+      nome: categoria.categoriaNome,
+      variacaoPercentual: categoria.percentual,
+    })),
+
+    cartoes: {
+      meses: 3,
+      percentual: comprometimentoCartoes.percentual,
     },
-    projecaoAnual,
+
+    parcelas: {
+      totalCentavos: parcelasFuturas.totalCentavos,
+      ultimoVencimento: parcelasFuturas.ultimoVencimento,
+      porMes: parcelasFuturas.porMes,
+    },
+
+    projecao: {
+      inicio: referencias.rows[0].inicio_projecao,
+      fim: referencias.rows[0].mes_atual,
+      saidasCentavos: reaisParaCentavos(projecaoAnual.projecao),
+      entradasCentavos: reaisParaCentavos(projecaoAnual.totalEntradas),
+      percentualComprometido: projecaoAnual.percentual,
+    },
+
     dicas,
   };
 }

@@ -238,15 +238,15 @@ export default function SaudeFinanceira() {
                  </dd>
                </div>
                                    <div>
-                 <dt>Entradas fixas previstas</dt>
+                 <dt>Entradas projetadas</dt>
                  <dd>
-                   {projecao?.entradasFixasCentavos == null
+                   {projecao?.entradasCentavos == null
                      ? 'Indisponível'
-                     : formatarMoeda(projecao.entradasFixasCentavos)}
+                     : formatarMoeda(projecao.entradasCentavos)}
                  </dd>
                </div>
                                    <div className="sf-projecao-destaque">
-                 <dt>Previsão de comprometimento das entradas fixas</dt>
+                 <dt>Previsão de comprometimento das entradas</dt>
                  <dd>{percentual(projecao?.percentualComprometido)}</dd>
                </div>
              </dl>
@@ -259,12 +259,12 @@ export default function SaudeFinanceira() {
                    é de <strong>{formatarMoeda(projecao.saidasCentavos)}</strong>.
                  </p>
                )}
-                           {projecao?.entradasFixasCentavos == null ? (
-                 <p>O total previsto de entradas fixas está indisponível.</p>
+                           {projecao?.entradasCentavos == null ? (
+                 <p>O total previsto de entradas projetadas está indisponível.</p>
                ) : (
                  <p>
-                   Suas entradas fixas previstas somam{' '}
-                   <strong>{formatarMoeda(projecao.entradasFixasCentavos)}</strong>
+                   A previsão é que suas entradas no próximo ano somem{' '}
+                   <strong>{formatarMoeda(projecao.entradasCentavos)}</strong>
                    {' no mesmo período.'}
                  </p>
                )}
