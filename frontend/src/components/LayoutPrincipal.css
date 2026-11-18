@@ -1,0 +1,45 @@
+.fl-app { --fl-menu-width: 72px; display: grid; grid-template-columns: var(--fl-menu-width) minmax(0, 1fr); min-height: 100dvh; background: var(--fl-bg); color: var(--fl-text); transition: grid-template-columns 180ms ease; }
+.fl-app[data-menu="fixo"] { --fl-menu-width: 224px; }
+.fl-app-corpo { min-width: 0; }
+.fl-sidebar-desktop { position: sticky; top: 0; align-self: start; height: 100dvh; overflow-y: auto; border-right: 1px solid var(--fl-line); background: var(--fl-field); }
+.fl-conteudo { max-width: 1480px; margin: 0 auto; padding: 28px 48px 52px; }
+.fl-conteudo:focus { outline: none; }
+.fl-barra-principal { display: flex; align-items: center; justify-content: flex-start; gap: 16px; padding: 18px 48px 0; }
+:root .fl-barra-principal .fl-theme-switch { margin-left: auto; }
+.fl-menu-dialogo { display: none; }
+.fl-pular-menu { position: fixed; top: -100px; left: 16px; z-index: 10; padding: 12px 18px; border: 1px solid var(--fl-accent); background: var(--fl-field); color: var(--fl-accent); border-radius: 3px; }
+.fl-pular-menu:focus { top: 12px; }
+.fl-app h1 { color: var(--fl-text); font-size: 29px; font-weight: 500; line-height: 1.25; letter-spacing: -.8px; }
+.fl-app button:focus-visible, .fl-app a:focus-visible, .fl-app select:focus-visible { outline: 2px solid var(--fl-accent); outline-offset: 3px; }
+.fl-app button, .fl-app select { font: inherit; }
+.fl-app svg { flex-shrink: 0; }
+.fl-app .fl-theme-switch--icones .fl-theme-option { width: 36px; min-height: 36px; padding: 8px; }
+.fl-app .fl-theme-switch--icones .fl-theme-option svg { width: 16px; height: 16px; }
+
+@media (pointer: coarse) {
+  .fl-app .fl-theme-switch--icones .fl-theme-option { width: 44px; min-height: 44px; }
+}
+
+@media (max-width: 1100px) and (min-width: 861px) {
+  .fl-conteudo { padding: 28px 32px 42px; }
+  .fl-barra-principal { padding-right: 32px; padding-left: 32px; }
+}
+
+@media (max-width: 860px) {
+  .fl-barra-principal { padding: 15px 22px; border-bottom: 1px solid var(--fl-line); background: var(--fl-field); }
+  .fl-conteudo { padding: 32px 24px; }
+  .fl-menu-dialogo[open] { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: min(224px, calc(100vw - 32px)); height: 100dvh; max-height: 100dvh; max-width: none; overflow-y: auto; margin: 0; padding: 0; border: 0; border-right: 1px solid var(--fl-line); background: var(--fl-field); color: var(--fl-text); }
+  .fl-menu-dialogo::backdrop { background: rgb(20 13 17 / 42%); }
+  .fl-menu-dialogo .fl-menu-lateral { min-height: 100%; flex: 1; }
+  body:has(.fl-menu-dialogo[open]) { overflow: hidden; }
+}
+
+@media (max-width: 480px) {
+  .fl-app { grid-template-columns: 72px minmax(0, 1fr); }
+  .fl-conteudo { padding: 28px 20px; }
+  .fl-app h1 { font-size: 26px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-app { transition: none; }
+}

@@ -1,0 +1,422 @@
+:root .fat-main {
+  width: min(100%, 1250px);
+  margin: auto;
+  padding: 36px 28px 56px;
+}
+
+:root .fat-topo,
+:root .fat-filtro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+:root .fat-filtro {
+  margin: 28px 0 14px;
+}
+
+:root .fat-filtro .fl-field {
+  width: min(100%, 280px);
+  margin-bottom: 0;
+}
+
+:root .fat-page h2 {
+  font-size: 19px;
+  font-weight: 500;
+}
+
+:root .fat-page h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+:root .fat-page select {
+  font: inherit;
+}
+
+:root .fat-page select:focus-visible {
+  outline: 2px solid var(--fl-accent);
+  outline-offset: 4px;
+}
+
+:root .fat-botao {
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid var(--fl-line);
+  border-radius: 3px;
+  background: var(--fl-field);
+  color: var(--fl-accent);
+}
+
+:root .fat-botao:disabled {
+  opacity: 0.6;
+}
+
+:root .fat-explicacao {
+  margin: 10px 0 16px;
+  color: var(--fl-secondary);
+  font-size: 13px;
+}
+
+:root .fat-resumo,
+:root .fat-grade-limites {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+:root .fat-painel {
+  padding: 20px;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-field);
+}
+
+:root .fat-resumo .fat-painel {
+  border-top: 3px solid var(--fl-accent);
+}
+
+:root .fat-resumo strong {
+  display: block;
+  margin: 10px 0;
+  font-size: 25px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+:root .fat-resumo p {
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+:root .fat-limites,
+:root .fat-listagem {
+  margin-top: 32px;
+}
+
+:root .fat-valores {
+  margin: 0;
+}
+
+:root .fat-valores div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--fl-line);
+}
+
+:root .fat-valores dt {
+  color: var(--fl-secondary);
+}
+
+:root .fat-valores dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+:root .fat-tabela-wrap {
+  margin-top: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+}
+
+:root .fat-tabela {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  text-align: left;
+  background: var(--fl-field);
+}
+
+:root .fat-tabela th,
+:root .fat-tabela td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--fl-line);
+}
+
+:root .fat-tabela thead th {
+  color: var(--fl-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+:root .fat-grupo {
+  background: var(--fl-muted);
+}
+
+:root .fat-grupo div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+:root .fat-grupo th {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+:root .fat-numero {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+:root .fat-aviso {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid var(--fl-line);
+  background: var(--fl-muted);
+  color: var(--fl-secondary);
+}
+
+:root .fat-aviso p + p {
+  margin-top: 8px;
+}
+
+:root .fat-erro {
+  margin-top: 12px;
+  color: var(--fl-error);
+}
+
+:root .fat-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Limites recolhidos por padrão */
+:root .fat-limites-resumo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-muted);
+  color: var(--fl-text);
+  font-size: 19px;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+
+:root .fat-limites-resumo::-webkit-details-marker {
+  display: none;
+}
+
+:root .fat-limites-resumo:focus-visible {
+  outline: 2px solid var(--fl-accent);
+  outline-offset: 4px;
+}
+
+:root .fat-limites-seta {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--fl-accent);
+  transition: transform 0.2s ease;
+}
+
+:root .fat-limites-detalhes[open] .fat-limites-seta {
+  transform: rotate(180deg);
+}
+
+:root .fat-limites-conteudo {
+  padding-top: 6px;
+}
+
+/* Cabeçalho rosa nos dois temas */
+:root .fat-tabela thead th {
+  background: var(--fl-accent);
+  color: var(--fl-accent-ink);
+  border-bottom-color: var(--fl-accent);
+}
+
+/* Uma tabela para cada mês de vencimento */
+:root .fat-mes {
+  margin-top: 24px;
+  overflow: hidden;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-field);
+}
+
+:root .fat-mes-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  background: var(--fl-muted);
+}
+
+:root .fat-mes-topo h3 {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+:root .fat-mes-total {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+:root .fat-mes-total span {
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+:root .fat-mes-total strong {
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+:root .fat-mes .fat-tabela-wrap {
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+:root .fat-mes .fat-tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+:root .fat-cartao-celula {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+:root .fat-cartao-celula small {
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+:root .fat-subtotais {
+  padding: 16px 20px;
+  border-top: 1px solid var(--fl-line);
+}
+
+:root .fat-subtotais p {
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+:root .fat-subtotais dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin: 10px 0 0;
+}
+
+:root .fat-subtotais dl div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+:root .fat-subtotais dt {
+  color: var(--fl-secondary);
+  font-size: 13px;
+}
+
+:root .fat-subtotais dd {
+  margin: 0;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+:root .fat-limite-barra {
+  margin-top: 12px;
+  padding: 18px 20px;
+  border: 1px solid var(--fl-line);
+  border-radius: 6px;
+  background: var(--fl-field);
+}
+
+:root .fat-limite-legendas,
+:root .fat-limite-rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+:root .fat-limite-legendas p {
+  font-size: 13px;
+  color: var(--fl-secondary);
+}
+
+:root .fat-limite-legendas strong {
+  color: var(--fl-text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+:root .fat-limite-trilho {
+  height: 8px;
+  margin: 14px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--fl-line);
+}
+
+:root .fat-limite-preenchimento {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fl-accent);
+  transition: width 0.3s ease;
+}
+
+:root .fat-limite-rodape p {
+  color: var(--fl-secondary);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root .fat-limite-preenchimento {
+    transition: none;
+  }
+}
+
+/* Apenas adaptações para telas pequenas */
+@media (max-width: 600px) {
+  :root .fat-main {
+    padding: 26px 16px 40px;
+  }
+
+  :root .fat-topo,
+  :root .fat-filtro {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  :root .fat-filtro .fl-field {
+    width: 100%;
+  }
+
+  :root .fat-page .fl-input {
+    font-size: 16px;
+  }
+
+    :root .fat-mes-topo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  :root .fat-mes-total {
+    text-align: left;
+  }
+}

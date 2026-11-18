@@ -9,7 +9,9 @@ export function ThemeProvider({ children }) {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = tema;
     document.documentElement.style.colorScheme = tema;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', tema === 'dark' ? '#201a1e' : '#fffcfd');
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', tema === 'dark' ? '#201a1e' : '#fffcfd');
   }, [tema]);
 
   function alterarTema(novoTema) {
@@ -18,7 +20,11 @@ export function ThemeProvider({ children }) {
     salvarTema(novoTema);
   }
 
-  return <ThemeContext.Provider value={{ tema, alterarTema }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ tema, alterarTema }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {

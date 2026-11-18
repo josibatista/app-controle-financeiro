@@ -1,0 +1,52 @@
+.fl-menu-lateral {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+  padding: 24px 18px 20px;
+  background: var(--fl-field);
+  color: var(--fl-text);
+  text-align: left;
+}
+
+.fl-menu-topo { display: flex; align-items: center; min-height: 44px; }
+:root .fl-menu-alternar { display: flex; align-items: center; justify-content: flex-start; gap: 12px; width: 100%; min-height: 44px; padding: 8px 0; border: 0; border-radius: 3px; background: transparent; color: var(--fl-secondary); text-align: left; font-size: 13px; }
+:root .fl-menu-alternar:hover { color: var(--fl-accent); }
+.fl-menu-alternar svg { flex: 0 0 20px; width: 20px; height: 20px; }
+.fl-menu-navegacao { margin-top: 34px; }
+.fl-menu-acesso { display: grid; gap: 8px; padding-bottom: 24px; border-bottom: 1px solid var(--fl-line); }
+.fl-menu-secoes { display: grid; gap: 5px; padding-top: 24px; }
+
+.fl-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 13px;
+  min-height: 45px;
+  padding: 11px 13px;
+  border-radius: 3px;
+  color: var(--fl-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.fl-menu-item:hover { color: var(--fl-text); background: var(--fl-muted); }
+.fl-menu-item:focus-visible { outline: 2px solid var(--fl-accent); outline-offset: 3px; }
+.fl-menu-item--ativo { color: var(--fl-accent); background: var(--fl-muted); font-weight: 500; }
+.fl-menu-item--ativo::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px; background: var(--fl-accent); }
+.fl-menu-icone { display: inline-flex; flex: 0 0 19px; }
+.fl-menu-icone svg { display: block; width: 19px; height: 19px; }
+.fl-menu-perfil { margin-bottom: 5px; }
+.fl-menu-em-breve { display: block; font-size: 11px; font-weight: 400; }
+.fl-menu-perfil .fl-menu-icone { width: 19px; height: 19px; flex-basis: 19px; }
+.fl-menu-rodape { margin-top: auto; padding-top: 74px; }
+.fl-menu-rodape .fl-menu-item { border-top: 1px solid var(--fl-line); border-radius: 0; padding-top: 20px; min-height: 58px; }
+
+.fl-menu-lateral--minimizado { padding-right: 10px; padding-left: 10px; }
+.fl-menu-lateral--minimizado .fl-menu-item { justify-content: center; gap: 0; padding-right: 0; padding-left: 0; }
+.fl-menu-lateral--minimizado .fl-menu-rotulo { display: none; }
+:root .fl-menu-lateral--minimizado .fl-menu-alternar { justify-content: center; gap: 0; }

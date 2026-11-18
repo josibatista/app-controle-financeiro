@@ -18,11 +18,15 @@ export function validarCampoCadastro(campo, dados) {
 
   if (campo === 'cpf' && !cpfValido(valor)) return 'Digite um CPF válido.';
 
-  if (campo === 'senha' && (valor.length < 8 || !/[a-zA-Z]/.test(valor) || !/[0-9]/.test(valor))) {
+  if (
+    campo === 'senha' &&
+    (valor.length < 8 || !/[a-zA-Z]/.test(valor) || !/[0-9]/.test(valor))
+  ) {
     return 'Use no mínimo 8 caracteres, com letras e números.';
   }
 
-  if (campo === 'confirmacaoSenha' && valor !== dados.senha) return 'As senhas precisam ser iguais.';
+  if (campo === 'confirmacaoSenha' && valor !== dados.senha)
+    return 'As senhas precisam ser iguais.';
 
   return '';
 }

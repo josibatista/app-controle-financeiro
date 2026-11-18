@@ -49,7 +49,9 @@ export default function AjudaCampo({ id, campo, texto }) {
       >
         <Icone nome="ajuda" />
       </button>
-      <span className="fl-tooltip" id={id} role="tooltip" hidden={!aberta}>{texto}</span>
+      <span className="fl-tooltip" id={id} role="tooltip" hidden={!aberta}>
+        {texto}
+      </span>
     </span>
   );
 }

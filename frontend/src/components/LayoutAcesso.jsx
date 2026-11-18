@@ -1,8 +1,15 @@
 import { useEffect } from 'react';
 import SeletorTema from './SeletorTema.jsx';
 
-export default function LayoutAcesso({ titulo, descricao, classePrincipal = '', children }) {
-  useEffect(() => { document.title = titulo; }, [titulo]);
+export default function LayoutAcesso({
+  titulo,
+  descricao,
+  classePrincipal = '',
+  children,
+}) {
+  useEffect(() => {
+    document.title = titulo;
+  }, [titulo]);
 
   return (
     <div className="fl-page">
@@ -17,4 +24,3 @@ export default function LayoutAcesso({ titulo, descricao, classePrincipal = '', 
     </div>
   );
 }
-
