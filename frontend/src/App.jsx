@@ -12,6 +12,7 @@ import FontesDestinos from './components/pages/FontesDestinos.jsx';
 import Lancamentos from './components/pages/Lancamentos.jsx';
 import Faturas from './components/pages/Faturas.jsx';
 import Relatorio from './components/pages/Relatorio.jsx';
+import SaudeFinanceira from './components/pages/SaudeFinanceira.jsx';
 
 export default function App() {
   return (
@@ -30,15 +31,7 @@ export default function App() {
               <Route path="/faturas" element={<Faturas />} />
               <Route path="/relatorios" element={<Relatorio />} />
               <Route path="/relatorio" element={<Navigate to="/relatorios" replace />} />
-              <Route
-                path="/saude-financeira"
-                element={
-                  <section aria-label="Saúde financeira">
-                    <h1>Saúde financeira</h1>
-                    <p>Em breve. O desafio será implementado em uma próxima etapa.</p>
-                  </section>
-                }
-              />
+              <Route path="/saude-financeira" element={<SaudeFinanceira />} />
             </Route>
           </Route>
           <Route path="/" element={<Navigate to="/inicio" replace />} />
