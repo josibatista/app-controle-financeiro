@@ -9,22 +9,15 @@ import {
     YAxis,
     Tooltip,
     ResponsiveContainer,
-    Rectangle
 } from 'recharts';
 
 function RelatorioFontesDestinos() {
-    //período selecionado para consulta
     const [inicio, setInicio] = useState('2026-01-01');
     const [fim, setFim] = useState('2026-12-31');
-
-    //dados retornados pela API
     const [relatorio, setRelatorio] = useState(null);
-
-    //estados para carregamento e erros
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState('');
 
-    //formata valores monetários
     const formatarMoeda = (valor) => {
         return Number(valor).toLocaleString('pt-BR', {
             style: 'currency',
@@ -33,7 +26,8 @@ function RelatorioFontesDestinos() {
     };
 
     //consulta o relatório no backend
-    async function consultarRelatorio() {
+    async function consultarRelatorio(event) {
+        event?.preventDefault();
         setCarregando(true);
         setErro('');
 
@@ -50,268 +44,267 @@ function RelatorioFontesDestinos() {
 
     return (
         <div className="relatorio-fontes-destinos">
-            <h2>Relatório por fontes e destinos</h2>
+        <section className="rel-painel" aria-labelledby="fd-filtro-titulo">
+            <h2 id="fd-filtro-titulo">Relatório por fontes e destinos</h2>
 
-            <div className="filtro-periodo">
-                <label>
-                    Data inicial:
-                    <input
-                        type="date"
-                        value={inicio}
-                        onChange={(e) => setInicio(e.target.value)}
-                    />
-                </label>
-
-                <label>
-                    Data final:
-                    <input
-                        type="date"
-                        value={fim}
-                        onChange={(e) => setFim(e.target.value)}
-                    />
-                </label>
-
-                <button
-                    onClick={consultarRelatorio}
-                    disabled={carregando}
-                >
-                    {carregando ? 'Consultando...' : 'Consultar relatório'}
-                </button>
+            <form className="filtro-periodo" onSubmit={consultarRelatorio}>
+            <div className="fl-field">
+                <label htmlFor="fd-data-inicial">Data inicial</label>
+                <input
+                id="fd-data-inicial"
+                className="fl-input"
+                type="date"
+                value={inicio}
+                onChange={(e) => setInicio(e.target.value)}
+                />
             </div>
 
-            {erro && <p role="alert">{erro}</p>}
+            <div className="fl-field">
+                <label htmlFor="fd-data-final">Data final</label>
+                <input
+                id="fd-data-final"
+                className="fl-input"
+                type="date"
+                value={fim}
+                onChange={(e) => setFim(e.target.value)}
+                />
+            </div>
 
-            {relatorio && (
-                <>
-                    <section className="indicadores-relatorio">
+            <button
+                type="submit"
+                className="rel-botao rel-botao--principal"
+                disabled={carregando}
+            >
+                {carregando ? 'Consultando...' : 'Consultar relatório'}
+            </button>
+            </form>
+        </section>
+
+        {erro && (
+            <p className="rel-erro" role="alert">
+            {erro}
+            </p>
+        )}
+
+        {relatorio && (
+            <>
+            <section
+                className="indicadores-relatorio"
+                aria-label="Resumo financeiro por fontes e destinos"
+            >
+                <article className="rel-painel rel-indicador">
+                <h3>Total de entradas</h3>
+                <strong>{formatarMoeda(relatorio.fontes.total)}</strong>
+                </article>
+
+                <article className="rel-painel rel-indicador">
+                <h3>Total de saídas</h3>
+                <strong>{formatarMoeda(relatorio.destinos.total)}</strong>
+                </article>
+
+                <article className="rel-painel rel-indicador">
+                <h3>Saldo do período</h3>
+                <strong>
+                    {formatarMoeda(
+                    relatorio.fontes.total - relatorio.destinos.total
+                    )}
+                </strong>
+                </article>
+            </section>
+
+            <div className="graficos-saidas">
+                <section className="rel-painel grafico-card">
+                <h3>Entradas por fonte</h3>
+                <p className="rel-subtitulo">
+                    Valores recebidos em cada fonte no período selecionado
+                </p>
+
+                {relatorio.fontes.itens.length > 0 ? (
+                    <div className="grafico-area">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                        data={relatorio.fontes.itens}
+                        layout="vertical"
+                        margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
+                        >
+                        <XAxis type="number" hide />
+                        <YAxis
+                            type="category"
+                            dataKey="nome"
+                            width={110}
+                            axisLine={false}
+                            tickLine={false}
+                        />
+                        <Tooltip
+                            formatter={(valor) => formatarMoeda(valor)}
+                            cursor={{ fill: 'var(--fl-muted)' }}
+                        />
+                        <Bar
+                            dataKey="total"
+                            name="Total recebido"
+                            fill="#B02E67"
+                            radius={[0, 6, 6, 0]}
+                            barSize={16}
+                        />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    </div>
+                ) : (
+                    <p className="rel-vazio">
+                    Não há entradas registradas neste período.
+                    </p>
+                )}
+                </section>
+
+                <section className="rel-painel grafico-card">
+                <h3>Saídas por destino</h3>
+                <p className="rel-subtitulo">
+                    Valores gastos em cada destino no período selecionado
+                </p>
+
+                {relatorio.destinos.itens.length > 0 ? (
+                    <div className="grafico-area">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                        data={relatorio.destinos.itens}
+                        layout="vertical"
+                        margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
+                        >
+                        <XAxis type="number" hide />
+                        <YAxis
+                            type="category"
+                            dataKey="nome"
+                            width={110}
+                            axisLine={false}
+                            tickLine={false}
+                        />
+                        <Tooltip
+                            formatter={(valor) => formatarMoeda(valor)}
+                            cursor={{ fill: 'var(--fl-muted)' }}
+                        />
+                        <Bar
+                            dataKey="total"
+                            name="Total gasto"
+                            fill="#B02E67"
+                            radius={[0, 6, 6, 0]}
+                            barSize={16}
+                        />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    </div>
+                ) : (
+                    <p className="rel-vazio">
+                    Não há saídas registradas neste período.
+                    </p>
+                )}
+                </section>
+            </div>
+
+            <section className="rel-secao" aria-labelledby="fd-contas-titulo">
+                <h2 id="fd-contas-titulo">Saldo por conta</h2>
+                <p className="rel-subtitulo">
+                Diferença entre as entradas e saídas de cada conta no período selecionado.
+                </p>
+
+                {relatorio.contas.length > 0 ? (
+                <div className="lista-saldos-contas">
+                    {relatorio.contas.map((conta) => (
+                    <article className="rel-painel card-saldo-conta" key={conta.id}>
+                        <h3>{conta.nome}</h3>
+
+                        <dl className="rel-valores">
                         <div>
-                            <h3>Total de entradas</h3>
-                            <p>{formatarMoeda(relatorio.fontes.total)}</p>
+                            <dt>Entradas</dt>
+                            <dd>{formatarMoeda(conta.totalEntradas)}</dd>
                         </div>
-
                         <div>
-                            <h3>Total de saídas</h3>
-                            <p>{formatarMoeda(relatorio.destinos.total)}</p>
+                            <dt>Saídas</dt>
+                            <dd>{formatarMoeda(conta.totalSaidas)}</dd>
                         </div>
+                        </dl>
 
-                        <div>
-                            <h3>Saldo do período</h3>
-                            <p>
-                                {formatarMoeda(
-                                    relatorio.fontes.total - relatorio.destinos.total
-                                )}
-                            </p>
+                        <div className="valor-saldo-conta">
+                        <span>Saldo do período</span>
+                        <strong>{formatarMoeda(conta.saldo)}</strong>
                         </div>
-                    </section>
+                    </article>
+                    ))}
+                </div>
+                ) : (
+                <p className="rel-vazio">
+                    Não há contas com movimentações cadastradas.
+                </p>
+                )}
+            </section>
 
-                    <section className="grafico-fontes">
-                        <h3>Entradas por fonte</h3>
-                        <p>Valores recebidos em cada fonte no período selecionado</p>
+            <section className="rel-secao" aria-labelledby="fd-tabela-titulo">
+                <h2 id="fd-tabela-titulo">Detalhamento por fonte e destino</h2>
+                <p className="rel-subtitulo">
+                Entradas, saídas e saldo de cada fonte ou destino no período selecionado.
+                </p>
 
-                        {relatorio.fontes.itens.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart
-                                    data={relatorio.fontes.itens}
-                                    layout="vertical"
-                                    margin={{
-                                        top: 10,
-                                        right: 20,
-                                        left: 10,
-                                        bottom: 10
-                                    }}
-                                >
-                                    <XAxis
-                                        type="number"
-                                        hide
-                                    />
+                {relatorio.registros.length > 0 ? (
+                <div className="rel-tabela-wrap">
+                    <table className="rel-tabela">
+                    <thead>
+                        <tr>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col" className="rel-numero">Entradas</th>
+                        <th scope="col" className="rel-numero">Saídas</th>
+                        <th scope="col" className="rel-numero">Saldo</th>
+                        </tr>
+                    </thead>
 
-                                    <YAxis
-                                        type="category"
-                                        dataKey="nome"
-                                        width={110}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
+                    <tbody>
+                        {relatorio.registros.map((registro) => (
+                        <tr key={registro.id}>
+                            <td>{registro.nome}</td>
+                            <td>
+                            {registro.tipo === 'renda'
+                                ? 'Fonte de renda'
+                                : registro.tipo === 'conta'
+                                ? 'Conta'
+                                : 'Destino'}
+                            </td>
+                            <td className="rel-numero">
+                            {formatarMoeda(registro.totalEntradas)}
+                            </td>
+                            <td className="rel-numero">
+                            {formatarMoeda(registro.totalSaidas)}
+                            </td>
+                            <td className="rel-numero">
+                            {registro.tipo === 'conta'
+                                ? formatarMoeda(registro.saldo)
+                                : 'Não se aplica'}
+                            </td>
+                        </tr>
+                        ))}
+                    </tbody>
 
-                                    <Tooltip
-                                        formatter={(valor) => formatarMoeda(valor)}
-                                    />
-
-                                    <Bar
-                                        dataKey="total"
-                                        name="Total recebido"
-                                        fill="#B02E67"
-                                        radius={[0, 6, 6, 0]}
-                                        barSize={18}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <p>Não há entradas registradas neste período.</p>
-                        )}
-                    </section>
-
-                    <section className="grafico-destinos">
-                        <h3>Saídas por destino</h3>
-                        <p>Valores gastos em cada destino no período selecionado</p>
-
-                        {relatorio.destinos.itens.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart
-                                    data={relatorio.destinos.itens}
-                                    layout="vertical"
-                                    margin={{
-                                        top: 10,
-                                        right: 20,
-                                        left: 10,
-                                        bottom: 10
-                                    }}
-                                >
-                                    <XAxis
-                                        type="number"
-                                        hide
-                                    />
-
-                                    <YAxis
-                                        type="category"
-                                        dataKey="nome"
-                                        width={110}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
-
-                                    <Tooltip
-                                        formatter={(valor) => formatarMoeda(valor)}
-                                    />
-
-                                    <Bar
-                                        dataKey="total"
-                                        name="Total gasto"
-                                        fill="#B02E67"
-                                        radius={[0, 6, 6, 0]}
-                                        barSize={18}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <p>Não há saídas registradas neste período.</p>
-                        )}
-                    </section>
-
-                    <section className="saldos-contas">
-                        <h3>Saldo por conta</h3>
-                        <p>
-                            Diferença entre as entradas e saídas de cada conta
-                            no período selecionado.
-                        </p>
-
-                        {relatorio.contas.length > 0 ? (
-                            <div className="lista-saldos-contas">
-                                {relatorio.contas.map((conta) => (
-                                    <div className="card-saldo-conta" key={conta.id}>
-                                        <h4>{conta.nome}</h4>
-
-                                        <p>
-                                            Entradas:
-                                            <strong>
-                                                {formatarMoeda(conta.totalEntradas)}
-                                            </strong>
-                                        </p>
-
-                                        <p>
-                                            Saídas:
-                                            <strong>
-                                                {formatarMoeda(conta.totalSaidas)}
-                                            </strong>
-                                        </p>
-
-                                        <div className="valor-saldo-conta">
-                                            <span>Saldo do período</span>
-                                            <strong>
-                                                {formatarMoeda(conta.saldo)}
-                                            </strong>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p>Não há contas com movimentações cadastradas.</p>
-                        )}
-                    </section>
-
-                    <section className="tabela-fontes-destinos">
-                        <h3>Detalhamento por fonte e destino</h3>
-                        <p>
-                            Entradas, saídas e saldo de cada fonte ou destino
-                            no período selecionado.
-                        </p>
-
-                        {relatorio.registros.length > 0 ? (
-                            <div className="tabela-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Nome</th>
-                                            <th>Tipo</th>
-                                            <th>Entradas</th>
-                                            <th>Saídas</th>
-                                            <th>Saldo</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {relatorio.registros.map((registro) => (
-                                            <tr key={registro.id}>
-                                                <td>{registro.nome}</td>
-
-                                                <td>
-                                                    {registro.tipo === 'renda'
-                                                        ? 'Fonte de renda'
-                                                        : registro.tipo === 'conta'
-                                                            ? 'Conta'
-                                                            : 'Destino'}
-                                                </td>
-
-                                                <td>
-                                                    {formatarMoeda(registro.totalEntradas)}
-                                                </td>
-
-                                                <td>
-                                                    {formatarMoeda(registro.totalSaidas)}
-                                                </td>
-
-                                                <td>
-                                                    {registro.tipo === 'conta'
-                                                        ? formatarMoeda(registro.saldo)
-                                                        : 'Não se aplica'}
-                                                </td>
-                                            </tr>
-                                        ))}
-
-                                        {/* Total geral */}
-                                        <tr className="linha-total">
-                                            <td><strong>Total</strong></td>
-                                            <td>—</td>
-
-                                            <td>
-                                                <strong>{formatarMoeda(relatorio.fontes.total)}</strong>
-                                            </td>
-
-                                            <td>
-                                                <strong>{formatarMoeda(relatorio.destinos.total)}</strong>
-                                            </td>
-
-                                            <td>—</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <p>Não há fontes ou destinos cadastrados neste período.</p>
-                        )}
-                    </section>
-                </>
-            )}
+                    <tfoot>
+                        <tr>
+                        <th>Total</th>
+                        <td>—</td>
+                        <th className="rel-numero">
+                            {formatarMoeda(relatorio.fontes.total)}
+                        </th>
+                        <th className="rel-numero">
+                            {formatarMoeda(relatorio.destinos.total)}
+                        </th>
+                        <td className="rel-numero">—</td>
+                        </tr>
+                    </tfoot>
+                    </table>
+                </div>
+                ) : (
+                <p className="rel-vazio">
+                    Não há fontes ou destinos cadastrados neste período.
+                </p>
+                )}
+            </section>
+            </>
+        )}
         </div>
     );
 }

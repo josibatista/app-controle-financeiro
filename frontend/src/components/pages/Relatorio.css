@@ -1,71 +1,75 @@
-.pagina-relatorios {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0px;
-    box-sizing: border-box;
-    color: var(--fl-text);
+:root .rel-main {
+  width: 100%;
+  margin: auto;
+  padding: 0;
 }
 
-.pagina-relatorios > h1 {
-    margin: 0;
-    color: var(--fl-text);
-    font-size: 28px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
+:root .rel-page h2 {
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--fl-text);
 }
 
-.abas-relatorios {
-    display: flex;
-    gap: 12px;
-    margin: 28px 0;
-    border-bottom: 1px solid var(--fl-line);
+:root .rel-page h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--fl-text);
 }
 
-.aba {
-    padding: 14px 20px;
-    border: none;
-    border-bottom: 3px solid transparent;
-    background: transparent;
-    color: var(--fl-secondary);
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease;
+:root .abas-relatorios {
+  display: flex;
+  gap: 8px;
+  margin: 28px 0 20px;
+  border-bottom: 1px solid var(--fl-line);
 }
 
-.aba:hover {
-    color: var(--fl-accent);
+:root .aba {
+  padding: 12px 18px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--fl-secondary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.aba.ativa {
-    color: var(--fl-accent);
-    border-bottom-color: var(--fl-accent);
-    font-weight: 700;
+:root .aba:hover {
+  color: var(--fl-accent);
 }
 
-.conteudo-relatorios {
-    width: 100%;
+:root .aba:focus-visible {
+  outline: 2px solid var(--fl-accent);
+  outline-offset: 2px;
 }
 
-@media (max-width: 768px) {
-    .pagina-relatorios {
-        padding: 24px 16px;
-    }
+:root .aba.ativa {
+  color: var(--fl-accent);
+  border-bottom-color: var(--fl-accent);
+  font-weight: 600;
+}
 
-    .pagina-relatorios > h1 {
-        font-size: 24px;
-    }
+:root .conteudo-relatorios {
+  width: 100%;
+  min-width: 0;
+}
 
-    .abas-relatorios {
-        gap: 4px;
-        overflow-x: auto;
-    }
+@media (max-width: 600px) {
+  :root .rel-main {
+    padding: 26px 16px 40px;
+  }
 
-    .aba {
-        white-space: nowrap;
-        padding: 12px;
-        font-size: 14px;
-    }
+  :root .abas-relatorios {
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  :root .aba {
+    white-space: nowrap;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
 }
