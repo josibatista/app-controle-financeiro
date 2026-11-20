@@ -54,3 +54,10 @@ export function alterarSenha(dados) {
     },
   });
 }
+
+export function excluirConta(senha) {
+  return api('/auth/perfil', {
+    method: 'DELETE',
+    body: { senha },
+  });
+}
