@@ -84,6 +84,10 @@
   margin-bottom: 0;
 }
 
+.fl-field label > span[aria-hidden="true"] {
+  color: var(--fl-error);
+}
+
 :root .cat-linha--editando {
   background: var(--fl-muted);
   box-shadow: inset 3px 0 var(--fl-accent);

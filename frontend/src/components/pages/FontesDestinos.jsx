@@ -79,7 +79,9 @@ function CampoFonte({
   if (nome === 'tipo') {
     return (
       <div className="fl-field">
-        <label htmlFor={id}>Tipo *</label>
+      <label htmlFor={id}>
+        Tipo <span aria-hidden="true">*</span>
+      </label>
 
         <select
           id={id}
