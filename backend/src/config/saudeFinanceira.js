@@ -1,0 +1,1 @@
+export const INFLACAO_PREVISTA = 0.05;

@@ -52,7 +52,6 @@ export default function MenuLateral({
         </span>
         <span className="fl-menu-rotulo">
           {rotulo}
-          {emBreve && <small className="fl-menu-em-breve">Em breve</small>}
         </span>
       </NavLink>
     );
