@@ -228,8 +228,12 @@ export async function calcularParcelasFuturas(usuarioId, db = pool) {
     resultadoTotal.rows[0].total
   );
 
-  const ultimoVencimento = resultadoTotal.rows[0].ultimo_vencimento
-    ? String(resultadoTotal.rows[0].ultimo_vencimento).slice(0, 7)
+  const rawUltimoVencimento = resultadoTotal.rows[0].ultimo_vencimento;
+
+  const ultimoVencimento = rawUltimoVencimento
+    ? rawUltimoVencimento instanceof Date
+      ? rawUltimoVencimento.toISOString().slice(0, 7)
+      : String(rawUltimoVencimento).slice(0, 7)
     : null;
 
   return {
