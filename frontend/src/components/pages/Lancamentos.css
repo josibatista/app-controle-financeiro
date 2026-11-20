@@ -1,6 +1,5 @@
-/* Estrutura da página */
 .lc-page .lc-main {
-  width: min(100%, 1200px);
+  width: 100%;
   margin: auto;
   padding: 0px;
 }

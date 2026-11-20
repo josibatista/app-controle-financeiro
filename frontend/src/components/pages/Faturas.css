@@ -1,5 +1,5 @@
 :root .fat-main {
-  width: min(100%, 1200px);
+  width: 100%;
   margin: auto;
   padding: 0px;
 }
