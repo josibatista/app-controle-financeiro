@@ -138,4 +138,44 @@ router.put('/senha', autenticar, limitarTentativas, async (req, res) => {
   return res.status(204).end();
 });
 
+router.delete('/perfil', autenticar, limitarTentativas, async (req, res) => {
+  const senha = typeof req.body?.senha === 'string'
+    ? req.body.senha
+    : '';
+
+  if (!senha) {
+    return res.status(400).json({
+      mensagem: 'Informe sua senha para excluir a conta.',
+      erros: { senha: 'Informe sua senha.' },
+    });
+  }
+
+  const senhaHash = await Perfil.buscarSenhaHash(req.usuarioId);
+
+  if (!senhaHash) {
+    return res.status(401).json({
+      mensagem: 'Sessão inválida. Entre novamente.',
+    });
+  }
+
+  const senhaCorreta = await bcrypt.compare(senha, senhaHash);
+
+  if (!senhaCorreta) {
+    return res.status(400).json({
+      mensagem: 'Senha incorreta.',
+      erros: { senha: 'Senha incorreta.' },
+    });
+  }
+
+  const excluida = await Perfil.excluirConta(req.usuarioId, senhaHash);
+
+  if (!excluida) {
+    return res.status(409).json({
+      mensagem: 'Os dados da conta foram alterados. Tente novamente.',
+    });
+  }
+
+  return res.status(204).end();
+});
+
 export default router;
