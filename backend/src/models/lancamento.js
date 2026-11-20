@@ -1,8 +1,6 @@
 import { pool } from '../config/db.js';
 import { randomUUID } from 'node:crypto';
 
-// Função interna: verifica a posse das entidades relacionadas
-// e a compatibilidade entre categoria e lançamento.
 async function validarRelacionamentos(
   usuarioId,
   tipo,
@@ -13,7 +11,10 @@ async function validarRelacionamentos(
   const resultado = await db.query(
     `SELECT
        c.tipo AS categoria_tipo,
-       f.tipo AS fonte_tipo
+       f.tipo AS fonte_tipo,
+       f.limite AS fonte_limite,
+       f.dia_vencimento AS fonte_dia_vencimento,
+       f.dia_fechamento AS fonte_dia_fechamento
      FROM categorias c
      CROSS JOIN fontes_destinos f
      WHERE c.id = $1
@@ -29,7 +30,6 @@ async function validarRelacionamentos(
     const erro = new Error(
       'Categoria ou fonte/destino inexistente ou de outro usuário.'
     );
-
     erro.code = 'RELACIONAMENTO_INVALIDO';
     throw erro;
   }
@@ -38,12 +38,114 @@ async function validarRelacionamentos(
     const erro = new Error(
       'O tipo da categoria deve ser igual ao tipo do lançamento.'
     );
-
     erro.code = 'TIPO_INCOMPATIVEL';
     throw erro;
   }
 
   return relacionamento;
+}
+
+function calcularDataVencimento(dataCompraStr, diaFechamento, diaVencimento) {
+  const [ano, mes, dia] = dataCompraStr.split('-').map(Number);
+
+  let mesFechamento = dia > diaFechamento ? mes + 1 : mes;
+  let anoFechamento = ano;
+  if (mesFechamento > 12) {
+    mesFechamento = 1;
+    anoFechamento += 1;
+  }
+
+  let mesVenc = diaVencimento < diaFechamento ? mesFechamento + 1 : mesFechamento;
+  let anoVenc = anoFechamento;
+  if (mesVenc > 12) {
+    mesVenc = 1;
+    anoVenc += 1;
+  }
+
+  const ultimoDia = new Date(Date.UTC(anoVenc, mesVenc, 0)).getUTCDate();
+  const diaSeguro = Math.min(diaVencimento, ultimoDia);
+
+  return [
+    anoVenc,
+    String(mesVenc).padStart(2, '0'),
+    String(diaSeguro).padStart(2, '0'),
+  ].join('-');
+}
+
+async function validarLimiteTotalCartao({
+  usuarioId,
+  fonteDestinoId,
+  limiteDecimal,
+  diaFechamento,
+  diaVencimento,
+  parcelasSimuladas,
+  ignorarLancamentoId = null,
+  db,
+}) {
+  if (limiteDecimal === null || limiteDecimal === undefined) return;
+
+  const limiteCentavos = decimalParaCentavos(limiteDecimal);
+  const hojeStr = new Date().toISOString().slice(0, 10);
+
+  const params = [usuarioId, fonteDestinoId];
+  let filtroEdicao = '';
+
+  if (ignorarLancamentoId !== null) {
+    params.push(ignorarLancamentoId);
+    filtroEdicao = `AND id <> $3`;
+  }
+
+  const res = await db.query(
+    `SELECT valor, data
+     FROM lancamentos
+     WHERE usuario_id = $1
+       AND fonte_destino_id = $2
+       AND tipo = 'saida'
+       ${filtroEdicao}`,
+    params
+  );
+
+  let utilizadoCentavos = 0;
+
+  for (const row of res.rows) {
+    const dataStr = row.data instanceof Date
+      ? row.data.toISOString().slice(0, 10)
+      : String(row.data).slice(0, 10);
+
+    const vencimento = calcularDataVencimento(
+      dataStr,
+      diaFechamento || 1,
+      diaVencimento || 1
+    );
+
+    if (vencimento >= hojeStr) {
+      utilizadoCentavos += decimalParaCentavos(row.valor);
+    }
+  }
+
+  let novoComprometidoCentavos = 0;
+  for (const parcela of parcelasSimuladas) {
+    const vencimento = calcularDataVencimento(
+      parcela.data,
+      diaFechamento || 1,
+      diaVencimento || 1
+    );
+    if (vencimento >= hojeStr) {
+      novoComprometidoCentavos += parcela.valorCentavos;
+    }
+  }
+
+  if (utilizadoCentavos + novoComprometidoCentavos > limiteCentavos) {
+    const erro = new Error(
+      'Seu limite disponível no cartão não comporta esse lançamento.'
+    );
+    erro.code = 'LIMITE_CARTAO_EXCEDIDO';
+    erro.status = 400;
+    erro.erros = {
+      valor: 'Seu limite disponível no cartão não comporta esse lançamento.',
+    };
+    throw erro;
+  }
 }
 
 function calcularDataParcela(dataInicial, numeroParcela) {
@@ -69,7 +171,6 @@ function calcularDataParcela(dataInicial, numeroParcela) {
     String(diaParcela).padStart(2, '0'),
   ].join('-');
 }
-
 
 function calcularValoresParcelas(valorCentavos, totalParcelas) {
   const valorBase = Math.floor(valorCentavos / totalParcelas);
@@ -253,9 +354,8 @@ export async function criarParcelado(
     totalParcelas,
   }
 ) {
-
   validarValor(valorCentavos);
-  
+
   if (
     !Number.isInteger(totalParcelas) ||
     totalParcelas < 1 ||
@@ -298,6 +398,26 @@ export async function criarParcelado(
       valorCentavos,
       totalParcelas
     );
+
+    if (
+      tipo === 'saida' &&
+      relacionamento.fonte_tipo === 'cartao_credito'
+    ) {
+      const parcelasSimuladas = valoresParcelas.map((valorParcela, idx) => ({
+        data: calcularDataParcela(data, idx),
+        valorCentavos: valorParcela,
+      }));
+
+      await validarLimiteTotalCartao({
+        usuarioId,
+        fonteDestinoId,
+        limiteDecimal: relacionamento.fonte_limite,
+        diaFechamento: relacionamento.fonte_dia_fechamento,
+        diaVencimento: relacionamento.fonte_dia_vencimento,
+        parcelasSimuladas,
+        db: client,
+      });
+    }
 
     const lancamentos = [];
 
@@ -353,16 +473,31 @@ export async function atualizar(
   },
   db = pool
 ) {
-
   validarValor(valorCentavos);
 
-  await validarRelacionamentos(
+  const relacionamento = await validarRelacionamentos(
     usuarioId,
     tipo,
     categoriaId,
     fonteDestinoId,
     db
   );
+
+  if (
+    tipo === 'saida' &&
+    relacionamento.fonte_tipo === 'cartao_credito'
+  ) {
+    await validarLimiteTotalCartao({
+      usuarioId,
+      fonteDestinoId,
+      limiteDecimal: relacionamento.fonte_limite,
+      diaFechamento: relacionamento.fonte_dia_fechamento,
+      diaVencimento: relacionamento.fonte_dia_vencimento,
+      parcelasSimuladas: [{ data, valorCentavos }],
+      ignorarLancamentoId: id,
+      db,
+    });
+  }
 
   const resultado = await db.query(
     `UPDATE lancamentos

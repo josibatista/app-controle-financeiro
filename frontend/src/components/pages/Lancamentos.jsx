@@ -99,6 +99,7 @@ export default function Lancamentos() {
   const [mensagem, setMensagem] = useState('');
   const dialogRef = useRef(null);
   const [totais, setTotais] = useState({entrada: 0, saida: 0, saldo: 0,});
+  const [erroModal, setErroModal] = useState('');
 
   useEffect(() => {
     document.title = 'Meus lançamentos';
@@ -285,6 +286,7 @@ export default function Lancamentos() {
     setSelecionado(null);
     setDados(novoFormulario());
     setErros({});
+    setErroModal('');
     setModo('novo');
   }
 
@@ -304,17 +306,20 @@ export default function Lancamentos() {
       total_parcelas: String(selecionado.total_parcelas),
     });
     setErros({});
+    setErroModal('');
     setModo('editar');
   }
 
   function fecharModal() {
     setModo(null);
     setSelecionado(null);
+    setErroModal('');
     setErros({});
   }
 
   async function salvar(event) {
     event.preventDefault();
+    setErroModal('');
 
     const novosErros = validarLancamento(
       dados,
@@ -357,7 +362,7 @@ export default function Lancamentos() {
       fecharModal();
     } catch (erro) {
       setErros(erro.erros ?? {});
-      setMensagem(erro.message);
+      setErroModal(erro.message);
     } finally {
       setOperando(false);
     }
@@ -748,6 +753,8 @@ export default function Lancamentos() {
                 lançamento e preserva o grupo de parcelamento.
               </p>
             )}
+
+            {erroModal && <p className="fl-field-error" role="alert">{erroModal}</p>}
 
             <div className="lc-modal-acoes">
               <button
