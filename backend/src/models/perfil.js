@@ -40,3 +40,45 @@ export async function atualizarSenha(usuarioId, senhaHash, db = pool) {
 
   return resultado.rowCount > 0;
 }
+
+export async function excluirConta(usuarioId, senhaHash) {
+  const cliente = await pool.connect();
+
+  try {
+    await cliente.query('BEGIN');
+
+    // Bloqueia o usuário e confirma que a senha não foi alterada entre a validação e a exclusão.
+    const usuario = await cliente.query(
+      `SELECT id
+       FROM usuarios
+       WHERE id = $1 AND senha_hash = $2
+       FOR UPDATE`,
+      [usuarioId, senhaHash]
+    );
+
+    if (usuario.rowCount === 0) {
+      await cliente.query('ROLLBACK');
+      return false;
+    }
+
+    // Os lançamentos precisam ser removidos antes, pois possuem referências a categorias e fontes.
+    await cliente.query(
+      'DELETE FROM lancamentos WHERE usuario_id = $1',
+      [usuarioId]
+    );
+
+    // A exclusão do usuário remove suas categorias e fontes/destinos por meio do ON DELETE CASCADE.
+    await cliente.query(
+      'DELETE FROM usuarios WHERE id = $1',
+      [usuarioId]
+    );
+
+    await cliente.query('COMMIT');
+    return true;
+  } catch (erro) {
+    await cliente.query('ROLLBACK');
+    throw erro;
+  } finally {
+    cliente.release();
+  }
+}

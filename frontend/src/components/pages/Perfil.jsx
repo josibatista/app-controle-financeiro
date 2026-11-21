@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Campo from '../Campo.jsx';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import {
   alterarSenha,
   atualizarPerfil,
   consultarPerfil,
+  excluirConta,
 } from '../../services/autenticacao.js';
 import { formatarCpf } from '../../services/cpf.js';
 import { validarCampoCadastro } from '../../services/validarCadastro.js';
@@ -30,7 +32,16 @@ function primeiroErro(erros) {
 }
 
 export default function Perfil() {
-  const { atualizarUsuario } = useAuth();
+  const { atualizarUsuario, logout } = useAuth();
+  const navigate = useNavigate();
+  const dialogoExclusao = useRef(null);
+
+  const [etapaExclusao, setEtapaExclusao] = useState(null);
+  const [senhaExclusao, setSenhaExclusao] = useState('');
+  const [erroExclusao, setErroExclusao] = useState('');
+  const [mensagemExclusao, setMensagemExclusao] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
+
   const [perfil, setPerfil] = useState(null);
   const [carregamento, setCarregamento] = useState({ status: 'carregando', erro: '' });
   const [tentativa, setTentativa] = useState(0);
@@ -178,6 +189,70 @@ export default function Perfil() {
       }
     } finally {
       setAlterandoSenha(false);
+    }
+  }
+
+  useEffect(() => {
+    const modal = dialogoExclusao.current;
+    if (!modal) return;
+
+    if (etapaExclusao && !modal.open) {
+      modal.showModal();
+    } else if (!etapaExclusao && modal.open) {
+      modal.close();
+    }
+  }, [etapaExclusao]);
+
+  function abrirExclusao(event) {
+    event.preventDefault();
+
+    if (excluindo) return;
+
+    setMensagemExclusao('');
+
+    if (!senhaExclusao.trim()) {
+      setErroExclusao('Informe sua senha atual.');
+      return;
+    }
+
+    setErroExclusao('');
+    setEtapaExclusao('aviso');
+  }
+
+  function fecharExclusao() {
+    if (excluindo) return;
+
+    setEtapaExclusao(null);
+    setSenhaExclusao('');
+    setErroExclusao('');
+    setMensagemExclusao('');
+  }
+
+  async function confirmarExclusao() {
+    if (excluindo || etapaExclusao !== 'aviso') return;
+
+    setExcluindo(true);
+    setErroExclusao('');
+    setMensagemExclusao('');
+
+    try {
+      await excluirConta(senhaExclusao);
+
+      // Conta excluída: encerra a sessão e retorna ao login.
+      logout();
+      navigate('/login', { replace: true });
+    } catch (erro) {
+      // Retorna ao formulário para corrigir a senha ou tentar novamente.
+      setEtapaExclusao(null);
+      setSenhaExclusao('');
+      setErroExclusao(erro.erros?.senha || '');
+      setMensagemExclusao(
+        erro.erros?.senha
+          ? ''
+          : erro.message || 'Não foi possível excluir a conta.'
+      );
+    } finally {
+      setExcluindo(false);
     }
   }
 
@@ -368,6 +443,107 @@ export default function Perfil() {
           )}
         </form>
       </section>
+
+      <section className="fl-perfil-secao">
+        <div className="fl-perfil-secao-titulo">
+          <h2>Excluir conta</h2>
+          <p>
+            Exclua permanentemente sua conta e os dados associados.
+          </p>
+        </div>
+
+        <form
+          className="fl-perfil-formulario"
+          onSubmit={abrirExclusao}
+          noValidate
+        >
+          <div className="fl-perfil-campos">
+            <div className="fl-perfil-campo-completo">
+              <Campo
+                id="perfil-senha-exclusao"
+                name="senha"
+                label="Senha atual"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Digite sua senha atual"
+                value={senhaExclusao}
+                onChange={(event) => {
+                  setSenhaExclusao(event.target.value);
+                  setErroExclusao('');
+                  setMensagemExclusao('');
+                }}
+                erro={erroExclusao}
+                marcarObrigatorio
+                required
+                disabled={excluindo}
+              />
+            </div>
+          </div>
+
+          <div className="fl-perfil-acoes">
+            <button
+              type="submit"
+              className="fl-perfil-botao fl-perfil-botao--excluir"
+              disabled={excluindo}
+            >
+              Excluir minha conta
+            </button>
+          </div>
+
+          {mensagemExclusao && (
+            <p className="fl-alert" role="alert">
+              {mensagemExclusao}
+            </p>
+          )}
+        </form>
+      </section>
+      
+      <dialog
+        ref={dialogoExclusao}
+        className="fl-perfil-dialogo"
+        aria-labelledby="fl-exclusao-titulo"
+        onCancel={(event) => {
+          event.preventDefault();
+          fecharExclusao();
+        }}
+      >
+        <h2 id="fl-exclusao-titulo">
+          Realmente deseja excluir sua conta?
+        </h2>
+
+        <p>
+          Ao confirmar, sua conta e todos os dados associados
+          serão excluídos permanentemente, incluindo informações
+          pessoais, categorias, fontes/destinos, cartões de crédito,
+          lançamentos e faturas.
+        </p>
+
+        <p>
+          <strong>Esta ação não poderá ser desfeita.</strong>
+        </p>
+
+        <div className="fl-perfil-acoes">
+          <button
+            type="button"
+            className="fl-perfil-botao"
+            onClick={fecharExclusao}
+            disabled={excluindo}
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            className="fl-perfil-botao fl-perfil-botao--perigo"
+            onClick={confirmarExclusao}
+            disabled={excluindo}
+          >
+            {excluindo ? 'Excluindo...' : 'Excluir definitivamente'}
+          </button>
+        </div>
+      </dialog>
+
+
     </section>
   );
 }

@@ -42,10 +42,20 @@ const campos = {
 
 function IconeAcao({ nome }) {
   const caminhos = {
-    editar: 'm15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z',
-    excluir: 'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
-    salvar: 'm5 12 4 4L19 6',
-    cancelar: 'm6 6 12 12M18 6 6 18',
+    editar: (
+      <>
+        <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z" />
+        <path d="M12 20h8" />
+      </>
+    ),
+    excluir: (
+      <>
+        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15" />
+        <path d="M10 10v7M14 10v7" />
+      </>
+    ),
+    salvar: <path d="m5 12 4 4L19 6" />,
+    cancelar: <path d="m6 6 12 12M18 6 6 18" />,
   };
 
   return (
@@ -59,7 +69,7 @@ function IconeAcao({ nome }) {
       aria-hidden="true"
       focusable="false"
     >
-      <path d={caminhos[nome]} />
+      {caminhos[nome]}
     </svg>
   );
 }
@@ -79,7 +89,9 @@ function CampoFonte({
   if (nome === 'tipo') {
     return (
       <div className="fl-field">
-        <label htmlFor={id}>Tipo *</label>
+      <label htmlFor={id}>
+        Tipo <span aria-hidden="true">*</span>
+      </label>
 
         <select
           id={id}

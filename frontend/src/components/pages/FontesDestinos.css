@@ -1,5 +1,5 @@
 :root .fd-main {
-  width: min(100%, 1200px);
+  width: 100%;
   margin: auto;
   padding: 0px;
 }
@@ -102,6 +102,10 @@
 :root .fd-tabela .fl-field {
   min-width: 110px;
   margin-bottom: 0;
+}
+
+.fl-field label > span[aria-hidden="true"] {
+  color: var(--fl-error);
 }
 
 :root .fd-linha--editando {

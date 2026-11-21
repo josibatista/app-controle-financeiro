@@ -5,7 +5,6 @@ import './RelatorioCategoria.css';
 import {
     PieChart,
     Pie,
-    Sector,
     BarChart,
     Bar,
     XAxis,
@@ -26,18 +25,12 @@ const CORES_GRAFICO = [
 ];
 
 function RelatorioCategorias() {
-    //período selecionado para consulta
     const [inicio, setInicio] = useState('2026-01-01');
     const [fim, setFim] = useState('2026-12-31');
-
-    //dados retornados da API
     const [relatorio, setRelatorio] = useState(null);
-
-    //estados para carregamento e erros
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState('');
 
-    //formata valores monetários
     const formatarMoeda = (valor) => {
         return Number(valor).toLocaleString('pt-BR', {
             style: 'currency',
@@ -45,16 +38,13 @@ function RelatorioCategorias() {
         });
     };
 
-    //consulta o relatório no backend
-    async function consultarRelatorio() {
+    async function consultarRelatorio(event) {
+        event?.preventDefault();
         setCarregando(true);
         setErro('');
 
         try {
             const dados = await buscarRelatorioCategoria(inicio, fim);
-
-            console.log('Dados recebidos da API:', dados);
-
             setRelatorio(dados);
         } catch (erro) {
             setErro(erro.message);
@@ -103,237 +93,251 @@ function RelatorioCategorias() {
 
     return (
         <div className="relatorio-categorias">
-            <h2>Relatório por categorias</h2>
+        <section className="rel-painel" aria-labelledby="cat-filtro-titulo">
+            <h2 id="cat-filtro-titulo">Relatório por categorias</h2>
 
-            <div className="filtro-periodo">
-                <label>
-                    Data inicial:
-                    <input
-                        type="date"
-                        value={inicio}
-                        onChange={(e) => setInicio(e.target.value)}
-                    />
-                </label>
-
-                <label>
-                    Data final:
-                    <input
-                        type="date"
-                        value={fim}
-                        onChange={(e) => setFim(e.target.value)}
-                    />
-                </label>
-
-                <button
-                    onClick={consultarRelatorio}
-                    disabled={carregando}
-                >
-                    {carregando ? 'Consultando...' : 'Consultar relatório'}
-                </button>
+            <form className="filtro-periodo" onSubmit={consultarRelatorio}>
+            <div className="fl-field">
+                <label htmlFor="cat-data-inicial">Data inicial</label>
+                <input
+                id="cat-data-inicial"
+                className="fl-input"
+                type="date"
+                value={inicio}
+                onChange={(e) => setInicio(e.target.value)}
+                />
             </div>
 
-            {erro && <p role="alert">{erro}</p>}
+            <div className="fl-field">
+                <label htmlFor="cat-data-final">Data final</label>
+                <input
+                id="cat-data-final"
+                className="fl-input"
+                type="date"
+                value={fim}
+                onChange={(e) => setFim(e.target.value)}
+                />
+            </div>
 
-            {relatorio && (
-                <>
-                    <section className="indicadores-relatorio">
-                        <div>
-                            <h3>Total de entradas</h3>
-                            <p>{formatarMoeda(relatorio.entradas.total)}</p>
-                        </div>
+            <button
+                type="submit"
+                className="rel-botao rel-botao--principal"
+                disabled={carregando}
+            >
+                {carregando ? 'Consultando...' : 'Consultar relatório'}
+            </button>
+            </form>
+        </section>
 
-                        <div>
-                            <h3>Total de saídas</h3>
-                            <p>{formatarMoeda(relatorio.saidas.total)}</p>
-                        </div>
+        {erro && (
+            <p className="rel-erro" role="alert">
+            {erro}
+            </p>
+        )}
 
-                        <div>
-                            <h3>Saldo do período</h3>
-                            <p>{formatarMoeda(relatorio.saldo)}</p>
-                        </div>
-                    </section>
+        {relatorio && (
+            <>
+            <section
+                className="indicadores-relatorio"
+                aria-label="Resumo financeiro do período"
+            >
+                <article className="rel-painel rel-indicador">
+                <h3>Total de entradas</h3>
+                <strong>{formatarMoeda(relatorio.entradas.total)}</strong>
+                </article>
 
-                    <div className="graficos-saidas">
+                <article className="rel-painel rel-indicador">
+                <h3>Total de saídas</h3>
+                <strong>{formatarMoeda(relatorio.saidas.total)}</strong>
+                </article>
 
-                        <div className="grafico-categorias">
-                            <h4>Distribuição das saídas</h4>
+                <article className="rel-painel rel-indicador">
+                <h3>Saldo do período</h3>
+                <strong>{formatarMoeda(relatorio.saldo)}</strong>
+                </article>
+            </section>
 
-                            <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                    <Pie
-                                        data={relatorio.saidas.categorias.map((categoria, indice) => ({
-                                            ...categoria,
-                                            fill: CORES_GRAFICO[indice % CORES_GRAFICO.length],
-                                        }))}
-                                        dataKey="total"
-                                        nameKey="nome"
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={75}
-                                        outerRadius={110}
-                                        paddingAngle={3}
-                                    />
+            <div className="graficos-saidas">
+                <section className="rel-painel grafico-card">
+                <h3>Distribuição das saídas</h3>
+                <p className="rel-subtitulo">Participação percentual por categoria</p>
 
-                                    <Tooltip
-                                        formatter={(valor) => formatarMoeda(valor)}
-                                    />
-
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-
-                        <section className="grafico-maiores-gastos">
-                            <h4>Onde você mais gastou</h4>
-                            <p>Categorias ordenadas do maior para o menor</p>
-
-                            {dadosOndeMaisGastou.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart
-                                        data={dadosOndeMaisGastou}
-                                        layout="vertical"
-                                        margin={{
-                                            top: 10,
-                                            right: 20,
-                                            left: 10,
-                                            bottom: 10
-                                        }}
-                                    >
-                                        <XAxis
-                                            type="number"
-                                            hide
-                                            domain={[0, 'dataMax']}
-                                        />
-
-                                        <YAxis
-                                            type="category"
-                                            dataKey="nome"
-                                            width={110}
-                                            axisLine={false}
-                                            tickLine={false}
-                                        />
-
-                                        <Tooltip
-                                            formatter={(valor) => formatarMoeda(valor)}
-                                            cursor={{ fill: '#FAF3F6' }}
-                                        />
-
-                                        <Bar
-                                            dataKey="total"
-                                            radius={[0, 6, 6, 0]}
-                                            barSize={12}
-                                            shape={(props) => (
-                                                <Rectangle
-                                                    {...props}
-                                                    fill={props.payload.cor}
-                                                />
-                                            )}
-                                        />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            ) : (
-                                <p>Não há despesas registradas neste período.</p>
-                            )}
-                        </section>
-
+                {relatorio.saidas.categorias.some((c) => c.total > 0) ? (
+                    <div className="grafico-area">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                        <Pie
+                            data={relatorio.saidas.categorias
+                            .filter((c) => c.total > 0)
+                            .map((categoria, indice) => ({
+                                ...categoria,
+                                fill: CORES_GRAFICO[indice % CORES_GRAFICO.length],
+                            }))}
+                            dataKey="total"
+                            nameKey="nome"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={70}
+                            outerRadius={105}
+                            paddingAngle={3}
+                        />
+                        <Tooltip formatter={(valor) => formatarMoeda(valor)} />
+                        <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
                     </div>
-                    <section className="tabela-categorias">
-                        <h3>Detalhamento por categoria</h3>
-                        <p>
-                            Comparação com o período anterior
-                        </p>
+                ) : (
+                    <p className="rel-vazio">Não há despesas registradas neste período.</p>
+                )}
+                </section>
 
-                        <div className="tabela-categorias-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Categoria</th>
-                                        <th>Saídas</th>
-                                        <th>Participação</th>
-                                        <th>Período anterior</th>
-                                        <th>Variação</th>
-                                    </tr>
-                                </thead>
+                <section className="rel-painel grafico-card">
+                <h3>Onde você mais gastou</h3>
+                <p className="rel-subtitulo">
+                    Categorias ordenadas do maior para o menor
+                </p>
 
-                                <tbody>
-                                    {relatorio.saidas.categorias.map((categoria) => {
-                                        const comparacao = obterComparacao(
-                                            categoria.variacaoPercentual
-                                        );
+                {dadosOndeMaisGastou.length > 0 ? (
+                    <div className="grafico-area">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                        data={dadosOndeMaisGastou}
+                        layout="vertical"
+                        margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
+                        >
+                        <XAxis type="number" hide domain={[0, 'dataMax']} />
+                        <YAxis
+                            type="category"
+                            dataKey="nome"
+                            width={110}
+                            axisLine={false}
+                            tickLine={false}
+                        />
+                        <Tooltip
+                            formatter={(valor) => formatarMoeda(valor)}
+                            cursor={{ fill: 'var(--fl-muted)' }}
+                        />
+                        <Bar
+                            dataKey="total"
+                            radius={[0, 6, 6, 0]}
+                            barSize={14}
+                            shape={(props) => (
+                            <Rectangle {...props} fill={props.payload.cor} />
+                            )}
+                        />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    </div>
+                ) : (
+                    <p className="rel-vazio">Não há despesas registradas neste período.</p>
+                )}
+                </section>
+            </div>
 
-                                        return (
-                                            <tr key={categoria.id}>
-                                                <td>{categoria.nome}</td>
+            <section className="rel-secao" aria-labelledby="cat-tabela-titulo">
+                <div className="rel-secao-topo">
+                <div>
+                    <h2 id="cat-tabela-titulo">Detalhamento por categoria</h2>
+                    <p className="rel-subtitulo">Comparação com o período anterior</p>
+                </div>
+                </div>
 
-                                                <td>
-                                                    {formatarMoeda(categoria.total)}
-                                                </td>
+                <div className="rel-tabela-wrap">
+                <table className="rel-tabela">
+                    <thead>
+                    <tr>
+                        <th scope="col">Categoria</th>
+                        <th scope="col" className="rel-numero">Saídas</th>
+                        <th scope="col" className="rel-numero">Participação</th>
+                        <th scope="col" className="rel-numero">Período anterior</th>
+                        <th scope="col">Variação</th>
+                    </tr>
+                    </thead>
 
-                                                <td>
-                                                    {Number(categoria.percentual).toFixed(2)}%
-                                                </td>
+                    <tbody>
+                    {relatorio.saidas.categorias.map((categoria) => {
+                        const comparacao = obterComparacao(
+                        categoria.variacaoPercentual
+                        );
 
-                                                <td>
-                                                    {categoria.periodoAnterior === null
-                                                        ? '—'
-                                                        : formatarMoeda(categoria.periodoAnterior)}
-                                                </td>
+                        return (
+                        <tr key={categoria.id}>
+                            <td>{categoria.nome}</td>
+                            <td className="rel-numero">
+                            {formatarMoeda(categoria.total)}
+                            </td>
+                            <td className="rel-numero">
+                            {Number(categoria.percentual).toFixed(2)}%
+                            </td>
+                            <td className="rel-numero">
+                            {categoria.periodoAnterior === null
+                                ? '—'
+                                : formatarMoeda(categoria.periodoAnterior)}
+                            </td>
+                            <td>
+                            <span className={`variacao ${comparacao.classe}`}>
+                                {comparacao.texto}
+                            </span>
+                            </td>
+                        </tr>
+                        );
+                    })}
+                    </tbody>
 
-                                                <td>
-                                                    <span className={`variacao ${comparacao.classe}`}>
-                                                        {comparacao.texto}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
+                    <tfoot>
+                    <tr>
+                        <th>Total</th>
+                        <th className="rel-numero">
+                        {formatarMoeda(relatorio.saidas.total)}
+                        </th>
+                        <th className="rel-numero">100,00%</th>
+                        <th className="rel-numero">
+                        {relatorio.saidas.categorias.some(
+                            (categoria) => categoria.periodoAnterior !== null
+                        )
+                            ? formatarMoeda(
+                                relatorio.saidas.categorias.reduce(
+                                (total, categoria) =>
+                                    total + Number(categoria.periodoAnterior ?? 0),
+                                0
+                                )
+                            )
+                            : '—'}
+                        </th>
+                        <th>—</th>
+                    </tr>
+                    </tfoot>
+                </table>
+                </div>
+            </section>
 
-                                <tfoot>
-                                    <tr>
-                                        <th>Total</th>
+            <section className="rel-secao" aria-labelledby="cat-entradas-titulo">
+                <h2 id="cat-entradas-titulo">Entradas por categoria</h2>
 
-                                        <th>
-                                            {formatarMoeda(relatorio.saidas.total)}
-                                        </th>
-
-                                        <th>100,00%</th>
-
-                                        <th>
-                                            {relatorio.saidas.categorias.some(
-                                                (categoria) => categoria.periodoAnterior !== null
-                                            )
-                                                ? formatarMoeda(
-                                                    relatorio.saidas.categorias.reduce(
-                                                        (total, categoria) =>
-                                                            total + Number(categoria.periodoAnterior ?? 0),
-                                                        0
-                                                    )
-                                                )
-                                                : '—'}
-                                        </th>
-
-                                        <th>—</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                {relatorio.entradas.categorias.length > 0 ? (
+                <div className="rel-grade-cards">
+                    {relatorio.entradas.categorias.map((categoria) => (
+                    <article className="rel-painel rel-card-secundario" key={categoria.id}>
+                        <h3>{categoria.nome}</h3>
+                        <dl className="rel-valores">
+                        <div>
+                            <dt>Total</dt>
+                            <dd>{formatarMoeda(categoria.total)}</dd>
                         </div>
-                    </section>
-
-                    <section>
-                        <h3>Entradas por categoria</h3>
-
-                        {relatorio.entradas.categorias.map((categoria) => (
-                            <div key={categoria.id}>
-                                <strong>{categoria.nome}</strong>
-                                <p>Total: {formatarMoeda(categoria.total)}</p>
-                                <p>Participação: {categoria.percentual}%</p>
-                            </div>
-                        ))}
-                    </section>
-                </>
-            )}
-
+                        <div>
+                            <dt>Participação</dt>
+                            <dd>{Number(categoria.percentual).toFixed(2)}%</dd>
+                        </div>
+                        </dl>
+                    </article>
+                    ))}
+                </div>
+                ) : (
+                <p className="rel-vazio">Não há entradas registradas neste período.</p>
+                )}
+            </section>
+            </>
+        )}
         </div>
     );
 }

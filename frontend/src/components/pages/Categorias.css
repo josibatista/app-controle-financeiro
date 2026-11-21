@@ -1,6 +1,6 @@
 :root .cat-main {
   width: 100%;
-  margin: 0px;
+  margin: auto;
   padding: 0px;
 }
 
@@ -82,6 +82,10 @@
 
 :root .cat-tabela .fl-field {
   margin-bottom: 0;
+}
+
+.fl-field label > span[aria-hidden="true"] {
+  color: var(--fl-error);
 }
 
 :root .cat-linha--editando {

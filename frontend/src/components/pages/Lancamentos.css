@@ -1,6 +1,5 @@
-/* Estrutura da página */
 .lc-page .lc-main {
-  width: min(100%, 1200px);
+  width: 100%;
   margin: auto;
   padding: 0px;
 }
@@ -73,6 +72,10 @@
 .lc-page .lc-form-grid .fl-field {
   min-width: 0;
   margin-bottom: 0;
+}
+
+.fl-field label > span[aria-hidden="true"] {
+  color: var(--fl-error);
 }
 
 .lc-page select {
