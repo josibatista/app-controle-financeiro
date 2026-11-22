@@ -272,20 +272,13 @@ npm ci
 **3.** Inicie o servidor de desenvolvimento:
 
 ```bash
-npm run dev -- --host 0.0.0.0
+npm run dev 
 ```
 
 **4.** Acesse a aplicação pelo navegador:
 
 http://localhost:5173
 
-O Vite informará no terminal o endereço local disponível para acesso. No Codespaces, abra a aba **Ports** e use **Open in Browser** na porta 5173. O backend também precisa estar rodando: as chamadas `/api` são encaminhadas pelo Vite para `http://127.0.0.1:3000`.
-
-Para gerar a versão de produção do frontend, execute:
-
-```bash
-npm run build
-```
 
 #### 3.2. Back-end
 
@@ -311,3 +304,8 @@ Se o servidor informar que o `JWT_SECRET` não foi definido, confira o arquivo `
 | **Letícia Bento** | Identidade visual e padronização de estilos da aplicação; desenvolvimento *full-stack* (front-end e back-end) de toda a parte de usuário, incluindo cadastro, login, perfil, validações, autenticação via JWT e *middlewares*. |
 | **Pamela Berti** | Desenvolvimento *full-stack* (front-end e back-end) dos relatórios gráficos (por categoria e por fonte/destino) e implementação da lógica e das rotas de back-end dos módulos de lançamentos e saúde financeira. |
 
+### Apresentação
+
+Este repositório conta com um vídeo demonstrativo resumido, que apresenta a execução do sistema e uma visão geral do código-fonte e suas funcionalidades.
+
+* [Acessar vídeo de apresentação](./video-de-apresentacao.mp4)
